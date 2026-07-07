@@ -214,6 +214,7 @@ a{color:inherit}
     <button data-nav="contracts" onclick="go('contracts')">Contracts</button>
     <button data-nav="referrals" onclick="go('referrals')">Referrals</button>
     <button data-nav="team" onclick="go('team')">Team</button>
+    <button data-nav="calendar" onclick="go('calendar')">Calendar</button>
   </div>
   <div class="spacer"></div>
   <div class="toggle" onclick="toggleMode()"><span id="modeicon">☾</span><span id="modelabel">Dark</span></div>
@@ -343,6 +344,17 @@ a{color:inherit}
   <div id="task-list"></div>
 </div>
 
+<!-- CALENDAR -->
+<div class="page" id="page-calendar">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div><div class="eyebrow">Strategic calendar</div><div class="sec-title serif">Calendar</div></div>
+    <button class="btn btn-primary" onclick="openEventForm()">+ Add event</button>
+  </div>
+  <div class="demo-flag">Everything coming up — events, deadlines, fundraisers, and task due dates. Outlook sync is planned; for now it lives here in the OS.</div>
+  <div class="metrics" id="calendar-metrics"></div>
+  <div id="calendar-list"></div>
+</div>
+
 </div>
 
 <div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
@@ -372,10 +384,12 @@ const GOAL=20000000, VET_COST=57500;
 let roster=[],contacts=[],organizations=[],org_notes=[],referrals=[];
 let donors=[],donor_notes=[],obligations=[],vet_slots=[],vet_contribs=[];
 let contracts=[],contract_notes=[],contract_documents=[],contract_contacts=[],tasks=[];
+let cal_events=[];
 const nid=p=>crypto.randomUUID();
 const fmt=n=>'$'+Math.round(n).toLocaleString();
 const fmtK=n=>n>=1000000?'$'+(n/1000000).toFixed(n%1000000?1:0)+'M':n>=1000?'$'+Math.round(n/1000)+'K':'$'+Math.round(n);
 const fmtDT=s=>{if(!s)return'';const d=new Date(s);if(isNaN(d))return s;return d.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});};
+const fmtDate=d=>d?new Date(d+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
 const initials=s=>s.replace(/[^A-Za-z ]/g,'').split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
 const rosterName=id=>{const r=roster.find(x=>x.id===id);return r?r.name:'Unassigned';};
 function OWNER(){const o=roster.find(r=>r.is_owner)||roster[0];return o?o.id:null;}
@@ -423,7 +437,8 @@ function renderHome(){
     {ic:'⚑',t:'Participant referrals',p:'Veterans, operators, and athletes referred.',stat:referrals.length,statl:'Referrals',go:'referrals'},
     {ic:'▤',t:'Government & research contracts',p:'Opportunities and awards being pursued.',stat:contracts.filter(c=>!['awarded','lost'].includes(c.stage)).length,statl:'Live pursuits',go:'contracts'},
     {ic:'☑',t:'Team & tasks',p:'The team, plus assigned and gated tasks.',stat:openTasks,statl:'Open tasks',go:'team'},
-    {ic:'◷',t:'Study phases & milestones',p:'Six phases across two years.',soon:true}
+    {ic:'◷',t:'Calendar',p:'Events, deadlines, and fundraisers coming up.',stat:cal_events.length,statl:'Calendar items',go:'calendar'},
+    {ic:'❖',t:'Study phases & milestones',p:'Six phases across two years.',soon:true}
   ];
   document.getElementById('home-cards').innerHTML=cards.map(c=>`
     <div class="wcard ${c.soon?'soon':''}" ${c.go?`onclick="go('${c.go}')"`:''}>
@@ -1092,19 +1107,70 @@ function saveReferral(id){
   else{const rec={id:nid('ref'),created_at:new Date().toISOString().slice(0,10),...data};referrals.push(rec);P.insert('referrals',rec);closeModal();}
   renderReferrals();renderHome();
 }
-window.__renderAll=function(){fillFilterOptions();renderHome();renderProspects();renderDonors();renderVets();renderContracts();renderTasks();renderReferrals();renderTeam();};
+window.__renderAll=function(){function renderCalendar(){
+  const host=document.getElementById('calendar-list');if(!host)return;
+  const today=new Date().toISOString().slice(0,10);
+  const items=[];
+  cal_events.forEach(e=>{ if(e.event_date) items.push({date:e.event_date,end:e.end_date,title:e.title,type:e.type||'event',cat:e.category||'',loc:e.location,approx:e.approximate,kind:'event',id:e.id}); });
+  tasks.forEach(t=>{ if(t.due_at && t.status!=='done' && t.status!=='dropped'){ items.push({date:String(t.due_at).slice(0,10),title:t.title,type:'task',cat:t.category||'',kind:'task'}); } });
+  const upcoming=items.filter(i=>i.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
+  const in30=new Date(Date.now()+30*864e5).toISOString().slice(0,10);
+  document.getElementById('calendar-metrics').innerHTML=[
+    ['Upcoming events',cal_events.filter(e=>e.event_date&&e.event_date>=today).length],
+    ['Task deadlines',upcoming.filter(i=>i.kind==='task').length],
+    ['Next 30 days',upcoming.filter(i=>i.date<=in30).length]
+  ].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
+  if(!upcoming.length){host.innerHTML='<div class="empty">No upcoming dates yet.</div>';return;}
+  let html='';let cur='';
+  const monthName=d=>new Date(d+'T00:00').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  upcoming.forEach(i=>{
+    const mk=i.date.slice(0,7);
+    if(mk!==cur){cur=mk;html+=`<div class="tierhead" style="margin-top:16px"><span class="tn">${monthName(i.date)}</span></div>`;}
+    const badge=i.kind==='task'?'<span class="badge b-stage">task</span>':(i.type==='deadline'?'<span class="badge b-risk">deadline</span>':(i.type==='fundraiser'||i.type==='event')?`<span class="badge b-pend">${i.type}</span>`:`<span class="badge b-ok">${i.type}</span>`);
+    const dlabel=fmtDate(i.date)+(i.end&&i.end!==i.date?' – '+fmtDate(i.end):'')+(i.approx?' (approx)':'');
+    const click=i.kind==='event'?`onclick="openEventForm('${i.id}')" style="cursor:pointer"`:'';
+    html+=`<div class="row" ${click}>
+      <div class="avatar" style="font-size:13px">${new Date(i.date+'T00:00').getDate()}</div>
+      <div class="main"><div class="rn">${i.title} ${badge}</div>
+      <div class="rs">${dlabel}${i.cat?' · '+i.cat:''}${i.loc?' · '+i.loc:''}</div></div>
+    </div>`;
+  });
+  host.innerHTML=html;
+}
+function openEventForm(id){
+  const e=id?cal_events.find(x=>x.id===id):{};
+  openModal(`<div class="mhead"><div class="mt"><h3>${id?'Edit event':'Add event'}</h3><div class="msub">Strategic calendar</div></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="mbody">
+    <div class="field"><label>Title</label><input id="ev-title" value="${e.title||''}"></div>
+    <div class="two"><div class="field"><label>Date</label><input id="ev-date" type="date" value="${e.event_date||''}"></div><div class="field"><label>End date (optional)</label><input id="ev-end" type="date" value="${e.end_date||''}"></div></div>
+    <div class="two"><div class="field"><label>Type</label><select id="ev-type">${['event','deadline','fundraiser','presentation','meeting','milestone'].map(t=>`<option value="${t}" ${e.type===t?'selected':''}>${t}</option>`).join('')}</select></div><div class="field"><label>Category</label><input id="ev-cat" value="${e.category||''}"></div></div>
+    <div class="field"><label>Location</label><input id="ev-loc" value="${e.location||''}"></div>
+    <div class="field"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="ev-approx" ${e.approximate?'checked':''} style="width:auto"> Date is approximate</label></div>
+    <div class="field"><label>Notes</label><textarea id="ev-notes">${e.notes||''}</textarea></div>
+    <div class="mfoot"><button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveEvent('${id||''}')">Save event</button></div>
+  </div>`);
+}
+function saveEvent(id){
+  const g=x=>document.getElementById(x).value;
+  const title=g('ev-title').trim();if(!title){alert('Title required');return;}
+  const data={title,event_date:g('ev-date')||null,end_date:g('ev-end')||null,type:g('ev-type'),category:g('ev-cat'),location:g('ev-loc'),approximate:document.getElementById('ev-approx').checked,notes:g('ev-notes')};
+  if(id){Object.assign(cal_events.find(x=>x.id===id),data);P.update('calendar_events',id,data);}
+  else{const rec={id:nid('ce'),...data};cal_events.push(rec);P.insert('calendar_events',rec);}
+  closeModal();renderCalendar();renderHome();
+}
+fillFilterOptions();renderHome();renderProspects();renderDonors();renderVets();renderContracts();renderTasks();renderReferrals();renderTeam();renderCalendar();};
 </script>
 <script>
 async function hydrate(){
   const q=n=>sb.from(n).select('*');
-  const [ros,con,orgs,ornotes,refs,don,dn,obl,vs,vc,ctr,cn,cd,cc,tk]=await Promise.all([
+  const [ros,con,orgs,ornotes,refs,don,dn,obl,vs,vc,ctr,cn,cd,cc,tk,ce]=await Promise.all([
     q('roster'),q('contacts'),q('organizations'),q('org_notes'),q('referrals'),
     q('donors'),q('donor_notes'),q('donor_obligations'),q('veteran_slots'),q('veteran_contributions'),
-    q('contracts'),q('contract_notes'),q('contract_documents'),q('contract_contacts'),q('tasks')
+    q('contracts'),q('contract_notes'),q('contract_documents'),q('contract_contacts'),q('tasks'),q('calendar_events')
   ]);
   roster=ros.data||[];contacts=con.data||[];organizations=orgs.data||[];org_notes=ornotes.data||[];referrals=refs.data||[];
   donors=don.data||[];donor_notes=dn.data||[];obligations=obl.data||[];vet_slots=vs.data||[];vet_contribs=vc.data||[];
-  contracts=ctr.data||[];contract_notes=cn.data||[];contract_documents=cd.data||[];contract_contacts=cc.data||[];tasks=tk.data||[];
+  contracts=ctr.data||[];contract_notes=cn.data||[];contract_documents=cd.data||[];contract_contacts=cc.data||[];tasks=tk.data||[];cal_events=ce.data||[];
 }
 async function boot(){
   try{ await hydrate(); }catch(e){ document.getElementById('lg-err').textContent='Could not load data. '+(e.message||''); return; }
