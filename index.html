@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mTBI Research OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const SB_URL='https://hwemawdopovlvuhjkjke.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3ZW1hd2RvcG92bHZ1aGpramtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MzE2MDgsImV4cCI6MjA5OTAwNzYwOH0.Ib5llP3rlBxfszky5OyXCf5zLf827Vm5chJwcddTfWg';
+const sb=window.supabase.createClient(SB_URL,SB_KEY);
+const P={
+  insert:(t,o)=>sb.from(t).insert(o).then(r=>{if(r.error){console.error('insert',t,r.error);alert('Save failed: '+r.error.message);}}),
+  update:(t,id,patch)=>sb.from(t).update(patch).eq('id',id).then(r=>{if(r.error){console.error('update',t,r.error);alert('Update failed: '+r.error.message);}}),
+  del:(t,id)=>sb.from(t).delete().eq('id',id).then(r=>{if(r.error)console.error('delete',t,r.error);})
+};
+function signOut(){sb.auth.signOut().then(()=>location.reload());}
+</script>
+<style>
+:root{
+  --page:#F5F0E6; --card:#FFFFFF; --raised:#FBF7EF; --border:#E5DCC9;
+  --text:#211E18; --text2:#5F5648; --muted:#9A9082;
+  --gold:#C49C5A; --gold-deep:#8A6D28; --eyebrow:#A67C2E;
+  --cta:#C49C5A; --cta-text:#FFFDF8;
+  --ok:#1E5638; --ok-bg:#DCEFE2; --pend:#8A6D28; --pend-bg:#F1E7D2;
+  --risk:#8E2C22; --risk-bg:#F6DED9; --track:#EAE4D6;
+  --grad:linear-gradient(90deg,#A67C2E,#C49C5A,#DCC084);
+  --shadow:0 1px 3px rgba(40,30,10,0.06);
+}
+[data-mode="dark"]{
+  --page:#1B1E23; --card:#262A30; --raised:#2E333A; --border:#383E46;
+  --text:#F0EBDF; --text2:#ADA79A; --muted:#8C8578;
+  --gold:#C9A768; --gold-deep:#D9BC82; --eyebrow:#C9A768;
+  --cta:#C49C5A; --cta-text:#241C08;
+  --ok:#63C48D; --ok-bg:#17321F; --pend:#D9BC82; --pend-bg:#33291A;
+  --risk:#E86A5C; --risk-bg:#3A211C; --track:#EAE4D6;
+  --grad:linear-gradient(90deg,#A67C2E,#C49C5A,#DCC084);
+  --shadow:0 1px 3px rgba(0,0,0,0.3);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.serif{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;letter-spacing:0.01em}
+h1,h2,h3{margin:0}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+/* top bar */
+.topbar{position:sticky;top:0;z-index:20;background:var(--page);border-bottom:0.5px solid var(--border)}
+.topbar .wrap{display:flex;align-items:center;gap:14px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.brand .mark{width:30px;height:30px;border-radius:7px;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#241C08;font-weight:600;font-size:13px;font-family:'Cormorant Garamond',serif}
+.brand .name{font-size:19px}
+.nav{display:flex;gap:2px;margin-left:12px;overflow-x:auto;max-width:100%}
+.nav button{font-family:inherit;font-size:13px;color:var(--text2);background:none;border:none;padding:8px 11px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.nav button:hover{background:var(--raised)}
+.nav button.active{color:var(--gold-deep);background:var(--raised);font-weight:500}
+.spacer{flex:1}
+.toggle{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);background:var(--card);border:0.5px solid var(--border);padding:6px 11px;border-radius:20px;cursor:pointer}
+.toggle:hover{border-color:var(--gold)}
+/* buttons */
+.btn{font-family:inherit;font-size:13px;font-weight:500;padding:8px 16px;border-radius:22px;border:0.5px solid transparent;cursor:pointer}
+.btn-primary{background:var(--cta);color:var(--cta-text)}
+.btn-primary:hover{filter:brightness(1.05)}
+.btn-outline{background:transparent;color:var(--gold-deep);border-color:var(--border)}
+.btn-outline:hover{border-color:var(--gold)}
+.btn-ghost{background:transparent;color:var(--eyebrow);border:none;padding:8px 10px}
+.btn-sm{padding:5px 12px;font-size:12px}
+/* eyebrow + section heads */
+.eyebrow{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--eyebrow);margin-bottom:6px}
+.sec-title{font-size:30px;margin-bottom:2px}
+.page{padding:26px 0 60px;display:none}
+.page.active{display:block}
+/* funding hero */
+.hero{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:26px 28px;margin-bottom:26px;box-shadow:var(--shadow)}
+.hero .htitle{font-size:34px;margin:2px 0 4px}
+.hero .hsub{color:var(--text2);max-width:760px;margin-bottom:18px}
+.bigtrack{height:22px;background:var(--track);border-radius:11px;overflow:hidden;border:0.5px solid var(--border)}
+.bigfill{height:100%;background:var(--grad);border-radius:11px;transition:width .5s}
+.herostats{display:flex;flex-wrap:wrap;gap:26px;margin-top:14px}
+.herostats .s .n{font-size:22px;font-family:'Cormorant Garamond',serif;font-weight:600}
+.herostats .s .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em}
+/* card grid */
+.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.wcard{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:18px 20px;cursor:pointer;transition:transform .12s,border-color .12s;box-shadow:var(--shadow);position:relative}
+.wcard:hover{transform:translateY(-2px);border-color:var(--gold)}
+.wcard.soon{opacity:0.62;cursor:default}
+.wcard.soon:hover{transform:none;border-color:var(--border)}
+.wcard .ic{font-size:20px;color:var(--gold);margin-bottom:12px}
+.wcard h3{font-size:17px;margin-bottom:4px}
+.wcard p{font-size:12.5px;color:var(--text2);margin:0 0 12px;min-height:34px}
+.wcard .stat{font-size:24px;font-family:'Cormorant Garamond',serif;font-weight:600;color:var(--gold-deep)}
+.wcard .statl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em}
+.soonbadge{position:absolute;top:14px;right:14px;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);border:0.5px solid var(--border);padding:2px 8px;border-radius:12px}
+/* metric row */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.metric{background:var(--raised);border-radius:12px;padding:14px 16px}
+.metric .n{font-size:24px;font-family:'Cormorant Garamond',serif;font-weight:600}
+.metric .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-top:2px}
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:18px}
+.filters input,.filters select{font-family:inherit;font-size:13px;padding:8px 11px;border-radius:9px;border:0.5px solid var(--border);background:var(--card);color:var(--text)}
+.filters input{min-width:180px}
+.filters .grow{flex:1}
+/* tier group */
+.tiergroup{margin-bottom:20px}
+.tierhead{display:flex;align-items:baseline;gap:10px;padding:6px 2px 10px;border-bottom:0.5px solid var(--border);margin-bottom:8px}
+.tierhead .tn{font-size:17px;font-family:'Cormorant Garamond',serif;font-weight:600}
+.tierhead .tr{font-size:12px;color:var(--muted)}
+.tierhead .ta{margin-left:auto;font-size:13px;color:var(--gold-deep);font-weight:500}
+/* donor / contract rows */
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:0.5px solid var(--border);border-radius:12px;background:var(--card);margin-bottom:8px;cursor:pointer;transition:border-color .12s}
+.row:hover{border-color:var(--gold)}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--raised);color:var(--gold-deep);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0}
+.row .main{flex:1;min-width:0}
+.row .rn{font-weight:500;font-size:14px}
+.row .rs{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .amt{text-align:right;flex-shrink:0}
+.row .amt .a1{font-weight:500;font-family:'Cormorant Garamond',serif;font-size:17px}
+.row .amt .a2{font-size:11px;color:var(--muted)}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.b-org{background:var(--pend-bg);color:var(--pend)}
+.b-ind{background:var(--raised);color:var(--text2)}
+.b-ok{background:var(--ok-bg);color:var(--ok)}
+.b-pend{background:var(--pend-bg);color:var(--pend)}
+.b-risk{background:var(--risk-bg);color:var(--risk)}
+.b-stage{background:var(--raised);color:var(--text2)}
+/* veteran slots */
+.vetgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.vetcard{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:16px}
+.vetcard .vt{font-weight:500;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.minitrack{height:9px;background:var(--raised);border-radius:6px;overflow:hidden;margin:8px 0 6px}
+.minifill{height:100%;background:var(--grad);border-radius:6px}
+.vetcard .vc{font-size:12px;color:var(--text2)}
+.vetcard .vsub{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(20,15,5,0.5);display:none;align-items:flex-start;justify-content:center;z-index:50;padding:40px 16px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:var(--card);border:0.5px solid var(--border);border-radius:16px;width:100%;max-width:560px;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
+.modal .mhead{display:flex;align-items:flex-start;gap:12px;padding:20px 22px;border-bottom:0.5px solid var(--border)}
+.modal .mhead .mt{flex:1;min-width:0}
+.modal .mhead h3{font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:600}
+.modal .mhead .msub{font-size:12.5px;color:var(--text2);margin-top:2px}
+.modal .close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:0 4px}
+.mbody{padding:18px 22px 22px}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.kv .k{color:var(--text2)}
+.kv .v{text-align:right;font-weight:500}
+.mlabel{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin:18px 0 8px}
+.obl{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;border-bottom:0.5px solid var(--border)}
+.obl .ob-check{width:18px;height:18px;border-radius:5px;border:1px solid var(--gold);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--gold-deep);font-size:12px}
+.obl.done .ob-check{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.obl.done .ob-text{color:var(--muted);text-decoration:line-through}
+.obl .ob-text{flex:1}
+.obl .ob-due{font-size:11px;color:var(--muted)}
+.note{padding:9px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.note .nmeta{font-size:11px;color:var(--muted);margin-top:3px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;font-family:inherit;font-size:13px;padding:9px 11px;border-radius:9px;border:0.5px solid var(--border);background:var(--page);color:var(--text)}
+.field textarea{resize:vertical;min-height:64px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.addnote{display:flex;gap:8px;margin-top:10px}
+.addnote input{flex:1}
+.taskrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.taskrow .tcheck{width:16px;height:16px;border-radius:4px;border:1px solid var(--gold);cursor:pointer;flex-shrink:0}
+.taskrow.done .tcheck{background:var(--ok);border-color:var(--ok)}
+.taskrow.done .ttext{color:var(--muted);text-decoration:line-through}
+.demo-flag{background:var(--pend-bg);color:var(--pend);font-size:12px;padding:8px 14px;border-radius:10px;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.empty{color:var(--muted);font-size:13px;padding:20px;text-align:center}
+.link{color:var(--gold-deep);cursor:pointer;border-bottom:1px dotted var(--gold);text-decoration:none}
+.link:hover{color:var(--eyebrow)}
+.rolechip{font-size:11px;color:var(--muted)}
+.taskrow .tcheck{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;line-height:1}
+.mhead .btn-sm{white-space:nowrap}
+.tabbar{display:flex;gap:4px;padding:0 22px;border-bottom:0.5px solid var(--border)}
+.tabbar .tab{font-family:inherit;font-size:13px;color:var(--text2);background:none;border:none;padding:10px 12px;cursor:pointer;border-bottom:2px solid transparent}
+.tabbar .tab.active{color:var(--gold-deep);border-bottom-color:var(--gold);font-weight:500}
+.docrow{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.meta{font-size:11px;color:var(--muted);text-align:right;line-height:1.35;flex-shrink:0}
+.tcheck.locked{border-color:var(--muted)!important;cursor:not-allowed;background:transparent!important}
+.taskrow .ttext .badge,.taskrow .ttext .rolechip{margin-left:4px}
+@media(max-width:640px){
+  .nav{display:none}
+  .hero .htitle{font-size:26px}
+  .sec-title{font-size:24px}
+  .two{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="login-gate" style="position:fixed;inset:0;background:var(--page);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="max-width:360px;width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:26px">
+    <div class="brand" style="margin-bottom:6px"><div class="mark">m</div><div class="name serif" style="font-size:19px">mTBI Research OS</div></div>
+    <p style="color:var(--text2);font-size:13px;margin:2px 0 18px">Sign in to continue.</p>
+    <div class="field"><label>Email</label><input id="lg-email" type="email" placeholder="name@org.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="field"><label>Password</label><input id="lg-pw" type="password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div id="lg-err" style="color:var(--risk);font-size:12px;min-height:16px;margin-bottom:8px"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<div class="topbar"><div class="wrap">
+  <div class="brand" onclick="go('home')">
+    <div class="mark">m</div><div class="name serif">mTBI Research OS</div>
+  </div>
+  <div class="nav">
+    <button data-nav="home" class="active" onclick="go('home')">Home</button>
+    <button data-nav="prospects" onclick="go('prospects')">Prospects</button>
+    <button data-nav="donors" onclick="go('donors')">Donors</button>
+    <button data-nav="contracts" onclick="go('contracts')">Contracts</button>
+    <button data-nav="referrals" onclick="go('referrals')">Referrals</button>
+    <button data-nav="team" onclick="go('team')">Team</button>
+  </div>
+  <div class="spacer"></div>
+  <div class="toggle" onclick="toggleMode()"><span id="modeicon">☾</span><span id="modelabel">Dark</span></div>
+  <div class="toggle" onclick="signOut()" style="margin-left:8px">Sign out</div>
+</div></div>
+
+<div class="wrap">
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="eyebrow">Every dollar moves this forward</div>
+    <div class="htitle serif">Funding progress</div>
+    <div class="hsub">Raising the $20,000,000 needed to execute the study at the level of rigor that makes its findings impossible for medicine and policy to ignore.</div>
+    <div class="bigtrack"><div class="bigfill" id="hero-fill" style="width:0%"></div></div>
+    <div class="herostats">
+      <div class="s"><div class="n" id="hs-raised">$0</div><div class="l">Raised to date</div></div>
+      <div class="s"><div class="n">$20,000,000</div><div class="l">Goal</div></div>
+      <div class="s"><div class="n" id="hs-pct">0%</div><div class="l">Of goal</div></div>
+      <div class="s"><div class="n" id="hs-committed">0</div><div class="l">Committed funders</div></div>
+      <div class="s"><div class="n" id="hs-vets">0</div><div class="l">Veterans sponsored</div></div>
+    </div>
+  </div>
+
+  <div class="eyebrow">A mission that takes a team</div>
+  <div class="sec-title serif" style="margin-bottom:18px">Command center</div>
+  <div class="cardgrid" id="home-cards"></div>
+</div>
+
+<!-- PROSPECTS -->
+<div class="page" id="page-prospects">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div>
+      <div class="eyebrow">Pipeline</div>
+      <div class="sec-title serif">Prospects</div>
+    </div>
+    <button class="btn btn-primary" onclick="openDonorForm()">+ Add prospect</button>
+  </div>
+  <div class="demo-flag">Prospective funders you are actively pursuing. When a prospect commits or gives, they move to Donors automatically.</div>
+  <div class="metrics" id="prospect-metrics"></div>
+  <div class="filters">
+    <input class="grow" id="pf-search" placeholder="Search prospects" oninput="renderProspects()">
+    <select id="pf-type" onchange="renderProspects()"><option value="">All types</option><option value="organization">Organizations</option><option value="individual">Individuals</option></select>
+    <select id="pf-tier" onchange="renderProspects()"><option value="">All target tiers</option></select>
+    <select id="pf-stage" onchange="renderProspects()"><option value="">All stages</option></select>
+  </div>
+  <div id="prospect-list"></div>
+</div>
+
+<!-- DONORS -->
+<div class="page" id="page-donors">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div>
+      <div class="eyebrow">Confirmed funders</div>
+      <div class="sec-title serif">Donors</div>
+    </div>
+    <button class="btn btn-primary" onclick="openDonorForm()">+ Add donor</button>
+  </div>
+  <div class="demo-flag">Those who have committed or given. Organized by giving tier.</div>
+  <div class="metrics" id="donor-metrics"></div>
+  <div class="filters">
+    <input class="grow" id="f-search" placeholder="Search donors" oninput="renderDonors()">
+    <select id="f-type" onchange="renderDonors()"><option value="">All types</option><option value="organization">Organizations</option><option value="individual">Individuals</option></select>
+    <select id="f-tier" onchange="renderDonors()"><option value="">All tiers</option></select>
+  </div>
+  <div id="donor-list"></div>
+
+  <div style="margin-top:34px">
+    <div class="eyebrow">Sponsor a veteran</div>
+    <div class="sec-title serif" style="font-size:24px;margin-bottom:6px">Veteran sponsorship pooling</div>
+    <p style="color:var(--text2);margin:0 0 16px;font-size:13px">Each veteran costs about $57,500 to carry through the full study. Gifts at the $5,000 level pool toward a full sponsorship; co-sponsors are recognized collectively.</p>
+    <div class="vetgrid" id="vet-list"></div>
+  </div>
+</div>
+
+<!-- CONTRACTS -->
+<div class="page" id="page-contracts">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div>
+      <div class="eyebrow">Government &amp; research contracts</div>
+      <div class="sec-title serif">Contract pipeline</div>
+    </div>
+    <button class="btn btn-primary" onclick="openContractForm()">+ Add contract</button>
+  </div>
+  <div class="metrics" id="contract-metrics"></div>
+  <div class="filters">
+    <input class="grow" id="cf-search" placeholder="Search opportunities and agencies" oninput="renderContracts()">
+    <select id="cf-stage" onchange="renderContracts()"><option value="">All stages</option></select>
+  </div>
+  <div id="contract-list"></div>
+</div>
+
+<!-- REFERRALS -->
+<div class="page" id="page-referrals">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div><div class="eyebrow">Enrollment opens in Phase 2</div><div class="sec-title serif">Participant referrals</div></div>
+    <button class="btn btn-primary" onclick="openReferralForm()">+ Add referral</button>
+  </div>
+  <div class="demo-flag">Veterans, operators, and NFL athletes referred to the study. Those submitted now are first contacted when enrollment opens.</div>
+  <div class="metrics" id="referral-metrics"></div>
+  <div class="filters">
+    <input class="grow" id="rf-search" placeholder="Search referrals" oninput="renderReferrals()">
+    <select id="rf-status" onchange="renderReferrals()"><option value="">All statuses</option><option value="new">New</option><option value="screening">Screening</option><option value="eligible">Eligible</option><option value="enrolled">Enrolled</option><option value="not_eligible">Not eligible</option><option value="declined">Declined</option></select>
+  </div>
+  <div id="referral-list"></div>
+</div>
+
+<!-- TEAM & TASKS -->
+<div class="page" id="page-team">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div><div class="eyebrow">Users</div><div class="sec-title serif">Team</div></div>
+    <button class="btn btn-primary" onclick="openUserForm()">+ Add teammate</button>
+  </div>
+  <div class="demo-flag">Everyone on the study, with their organization. Click a name for their profile; click an organization for its card.</div>
+  <div class="cardgrid" id="team-list"></div>
+
+  <div style="margin-top:36px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+    <div><div class="eyebrow">Assigned &amp; gated work</div><div class="sec-title serif" style="font-size:24px">Task tracker</div></div>
+    <button class="btn btn-primary" onclick="openTaskForm()">+ Add task</button>
+  </div>
+  <div class="metrics" id="task-metrics"></div>
+  <div class="filters">
+    <select id="tf-assignee" onchange="renderTasks()"><option value="">Whole team</option></select>
+    <select id="tf-status" onchange="renderTasks()"><option value="">All statuses</option><option value="open">Open</option><option value="in_progress">In progress</option><option value="gated">Gated</option><option value="done">Done</option></select>
+  </div>
+  <div id="team-monitor"></div>
+  <div id="task-list"></div>
+</div>
+
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+const TIERS={
+  champion:{name:'Champions for Our Heroes',range:'$1,000,000 and above',min:1000000},
+  research_founder:{name:'Research Founder',range:'$500,000 – $999,999',min:500000},
+  frontline:{name:'Frontline Funders',range:'$100,000 – $499,999',min:100000},
+  sponsor_veteran:{name:'Sponsor a Veteran',range:'$5,000 and above',min:5000},
+  community:{name:'Community Contributor',range:'Any amount',min:0}
+};
+const TIER_ORDER=['champion','research_founder','frontline','sponsor_veteran','community'];
+const STAGES={prospect:'Prospect',contacted:'Contacted',in_conversation:'In conversation',verbal_commit:'Verbal commit',committed:'Committed',stewardship:'Stewardship',passed:'Passed'};
+const CSTAGES={identified:'Identified',pre_solicitation:'Pre-solicitation',proposal:'Proposal',submitted:'Submitted',awarded:'Awarded',lost:'Lost'};
+const OBLIGATIONS={
+  champion:['Feature on website','Name as Lead Funder in publications','Acknowledge in journal submissions','Periodic progress calls','Clinical site visit invitation','Advance copy of findings','Final results presentation invite','Acknowledge in DoD/VA policy briefings'],
+  research_founder:['Name as Research Founder in publications','Recognize on website','Quarterly progress updates','Advance copy of findings','Final results presentation invite'],
+  frontline:['Recognize as supporting funder','List on website','Semi-annual progress updates','Final results presentation invite'],
+  sponsor_veteran:['List as veteran sponsor on website'],
+  community:['Recognize in study acknowledgments','Send published findings on release']
+};
+const GOAL=20000000, VET_COST=57500;
+
+let roster=[],contacts=[],organizations=[],org_notes=[],referrals=[];
+let donors=[],donor_notes=[],obligations=[],vet_slots=[],vet_contribs=[];
+let contracts=[],contract_notes=[],contract_documents=[],contract_contacts=[],tasks=[];
+const nid=p=>crypto.randomUUID();
+const fmt=n=>'$'+Math.round(n).toLocaleString();
+const fmtK=n=>n>=1000000?'$'+(n/1000000).toFixed(n%1000000?1:0)+'M':n>=1000?'$'+Math.round(n/1000)+'K':'$'+Math.round(n);
+const fmtDT=s=>{if(!s)return'';const d=new Date(s);if(isNaN(d))return s;return d.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});};
+const initials=s=>s.replace(/[^A-Za-z ]/g,'').split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+const rosterName=id=>{const r=roster.find(x=>x.id===id);return r?r.name:'Unassigned';};
+function OWNER(){const o=roster.find(r=>r.is_owner)||roster[0];return o?o.id:null;}
+const activeDonors=()=>donors.filter(d=>d.stage!=='passed');
+
+function go(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.nav===p));
+  window.scrollTo(0,0);
+}
+function toggleMode(){
+  const h=document.documentElement, dark=h.getAttribute('data-mode')==='dark';
+  h.setAttribute('data-mode',dark?'light':'dark');
+  document.getElementById('modeicon').textContent=dark?'☾':'☀';
+  document.getElementById('modelabel').textContent=dark?'Dark':'Light';
+  try{localStorage.setItem('mtbi-mode',dark?'light':'dark')}catch(e){}
+}
+(function(){try{const m=localStorage.getItem('mtbi-mode');if(m){document.documentElement.setAttribute('data-mode',m);document.getElementById('modeicon').textContent=m==='dark'?'☀':'☾';document.getElementById('modelabel').textContent=m==='dark'?'Light':'Dark';}}catch(e){}})();
+
+function totals(){
+  const committed=donors.filter(d=>['committed','stewardship'].includes(d.stage));
+  const received=donors.reduce((s,d)=>s+(+d.amount_received||0),0);
+  const pledged=activeDonors().reduce((s,d)=>s+Math.max(+d.amount_pledged||0,+d.amount_received||0),0);
+  const vetsFunded=vet_slots.filter(v=>slotRaised(v.id)>=v.goal_amount).length;
+  const pipeline=activeDonors().filter(d=>!['committed','stewardship'].includes(d.stage)).length;
+  return {committed:committed.length,received,pledged,vetsFunded,pipeline};
+}
+const slotRaised=sid=>vet_contribs.filter(c=>c.slot_id===sid).reduce((s,c)=>s+(+c.amount||0),0);
+
+function renderHome(){
+  const t=totals();
+  document.getElementById('hero-fill').style.width=Math.min(100,t.received/GOAL*100)+'%';
+  document.getElementById('hs-raised').textContent=fmt(t.received);
+  document.getElementById('hs-pct').textContent=(t.received/GOAL*100).toFixed(1)+'%';
+  document.getElementById('hs-committed').textContent=t.committed;
+  document.getElementById('hs-vets').textContent=t.vetsFunded;
+  const openTasks=tasks.filter(x=>x.status!=='done').length;
+  const overdueObl=obligations.filter(o=>o.status!=='done'&&o.due_date&&o.due_date<'2026-07-06').length;
+  const cards=[
+    {ic:'◈',t:'Prospects',p:'Funders you are actively pursuing.',stat:prospectDonors().filter(d=>d.stage!=='passed').length,statl:'Active prospects',go:'prospects'},
+    {ic:'◆',t:'Donors',p:'Those who have committed or funded.',stat:fundedDonors().length,statl:'Committed funders',go:'donors'},
+    {ic:'⬡',t:'Veteran sponsorship',p:'Pooled $5K gifts toward full sponsorships.',stat:t.vetsFunded+' / '+vet_slots.length,statl:'Veterans funded',go:'donors'},
+    {ic:'✦',t:'Recognition & obligations',p:'What is promised to each funder, and what is due.',stat:overdueObl,statl:'Due or overdue',go:'donors'},
+    {ic:'⚑',t:'Participant referrals',p:'Veterans, operators, and athletes referred.',stat:referrals.length,statl:'Referrals',go:'referrals'},
+    {ic:'▤',t:'Government & research contracts',p:'Opportunities and awards being pursued.',stat:contracts.filter(c=>!['awarded','lost'].includes(c.stage)).length,statl:'Live pursuits',go:'contracts'},
+    {ic:'☑',t:'Team & tasks',p:'The team, plus assigned and gated tasks.',stat:openTasks,statl:'Open tasks',go:'team'},
+    {ic:'◷',t:'Study phases & milestones',p:'Six phases across two years.',soon:true}
+  ];
+  document.getElementById('home-cards').innerHTML=cards.map(c=>`
+    <div class="wcard ${c.soon?'soon':''}" ${c.go?`onclick="go('${c.go}')"`:''}>
+      ${c.soon?'<div class="soonbadge">Coming soon</div>':''}
+      <div class="ic">${c.ic}</div>
+      <h3 class="serif">${c.t}</h3><p>${c.p}</p>
+      ${c.stat!==undefined?`<div class="stat">${c.stat}</div><div class="statl">${c.statl}</div>`:'<div class="statl">Placeholder</div>'}
+    </div>`).join('');
+}
+
+function fillFilterOptions(){
+  const tierOpts=TIER_ORDER.map(k=>`<option value="${k}">${TIERS[k].name}</option>`).join('');
+  document.getElementById('f-tier').innerHTML='<option value="">All tiers</option>'+tierOpts;
+  document.getElementById('pf-tier').innerHTML='<option value="">All target tiers</option>'+tierOpts;
+  document.getElementById('pf-stage').innerHTML='<option value="">All stages</option>'+Object.keys(STAGES).map(k=>`<option value="${k}">${STAGES[k]}</option>`).join('');
+  document.getElementById('cf-stage').innerHTML='<option value="">All stages</option>'+Object.keys(CSTAGES).map(k=>`<option value="${k}">${CSTAGES[k]}</option>`).join('');
+}
+
+function renderDonorMetrics(){
+  const t=totals();
+  const el=document.getElementById('donor-metrics');
+  el.innerHTML=[
+    ['Pledged (active)',fmt(t.pledged)],['Received',fmt(t.received)],
+    ['Committed funders',t.committed],['In pipeline',t.pipeline]
+  ].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
+}
+
+function donorTierKey(d){return d.tier||d.target_tier||'community';}
+function stageBadge(d){
+  if(d.stage==='committed'||d.stage==='stewardship')return `<span class="badge b-ok">${STAGES[d.stage]}</span>`;
+  if(d.stage==='passed')return `<span class="badge b-risk">Passed · ${d.passed_reason==='not_interested'?'not interested':'revisit later'}</span>`;
+  return `<span class="badge b-stage">${STAGES[d.stage]}</span>`;
+}
+function isFunded(d){return ['committed','stewardship'].includes(d.stage)||(+d.amount_received||0)>0;}
+function fundedDonors(){return donors.filter(isFunded);}
+function prospectDonors(){return donors.filter(d=>!isFunded(d));}
+function donorRowsHTML(list,empty){
+  let html='';
+  TIER_ORDER.forEach(tk=>{
+    const g=list.filter(d=>donorTierKey(d)===tk);
+    if(!g.length)return;
+    const sum=g.reduce((s,d)=>s+Math.max(+d.amount_pledged||0,+d.amount_received||0),0);
+    html+=`<div class="tiergroup"><div class="tierhead"><span class="tn">${TIERS[tk].name}</span><span class="tr">${TIERS[tk].range} · ${g.length}</span><span class="ta">${fmt(sum)}</span></div>`;
+    g.forEach(d=>{
+      const amt=Math.max(+d.amount_pledged||0,+d.amount_received||0);
+      const isTarget=!d.tier&&d.target_tier;
+      html+=`<div class="row" onclick="openDonor('${d.id}')">
+        <div class="avatar">${initials(d.name)}</div>
+        <div class="main">
+          <div class="rn">${d.name} ${d.type==='organization'?'<span class="badge b-org">Organization</span>':'<span class="badge b-ind">Individual</span>'}</div>
+          <div class="rs">${stageBadge(d)}${isTarget?' · <span style="color:var(--muted)">target tier</span>':''} · ${rosterName(d.owner_id)}${d.source?' · '+d.source:''}</div>
+        </div>
+        <div class="amt"><div class="a1">${amt?fmtK(amt):'—'}</div><div class="a2">${d.amount_received?fmt(d.amount_received)+' in':'no gift yet'}</div></div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  return html||`<div class="empty">${empty||'Nothing here yet.'}</div>`;
+}
+function renderDonors(){
+  const q=(document.getElementById('f-search').value||'').toLowerCase();
+  const ft=document.getElementById('f-type').value, fi=document.getElementById('f-tier').value;
+  let list=fundedDonors().filter(d=>{
+    if(q&&!(d.name.toLowerCase().includes(q)||(d.primary_contact||'').toLowerCase().includes(q)||(d.source||'').toLowerCase().includes(q)))return false;
+    if(ft&&d.type!==ft)return false;
+    if(fi&&donorTierKey(d)!==fi)return false;
+    return true;
+  });
+  const received=donors.reduce((s,d)=>s+(+d.amount_received||0),0);
+  const pledged=fundedDonors().reduce((s,d)=>s+Math.max(+d.amount_pledged||0,+d.amount_received||0),0);
+  document.getElementById('donor-metrics').innerHTML=[['Committed funders',fundedDonors().length],['Pledged',fmt(pledged)],['Received',fmt(received)],['Veterans funded',vet_slots.filter(v=>slotRaised(v.id)>=v.goal_amount).length]].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
+  document.getElementById('donor-list').innerHTML=donorRowsHTML(list,'No donors match these filters.');
+}
+function renderProspects(){
+  const q=(document.getElementById('pf-search').value||'').toLowerCase();
+  const ft=document.getElementById('pf-type').value, fi=document.getElementById('pf-tier').value, fs=document.getElementById('pf-stage').value;
+  let list=prospectDonors().filter(d=>{
+    if(q&&!(d.name.toLowerCase().includes(q)||(d.primary_contact||'').toLowerCase().includes(q)||(d.source||'').toLowerCase().includes(q)))return false;
+    if(ft&&d.type!==ft)return false;
+    if(fi&&donorTierKey(d)!==fi)return false;
+    if(fs&&d.stage!==fs)return false;
+    return true;
+  });
+  const active=prospectDonors().filter(d=>d.stage!=='passed');
+  const potential=active.reduce((s,d)=>s+Math.max(+d.amount_pledged||0,0),0);
+  document.getElementById('prospect-metrics').innerHTML=[['Active prospects',active.length],['Potential pledged',fmt(potential)],['In conversation',prospectDonors().filter(d=>d.stage==='in_conversation').length],['Verbal commits',prospectDonors().filter(d=>d.stage==='verbal_commit').length]].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
+  document.getElementById('prospect-list').innerHTML=donorRowsHTML(list,'No prospects match these filters.');
+}
+
+function renderVets(){
+  document.getElementById('vet-list').innerHTML=vet_slots.map(v=>{
+    const raised=slotRaised(v.id), pct=Math.min(100,raised/v.goal_amount*100);
+    const contribs=vet_contribs.filter(c=>c.slot_id===v.id);
+    const names=contribs.map(c=>c.contributor_name).join(', ');
+    const funded=raised>=v.goal_amount;
+    return `<div class="vetcard" style="cursor:pointer" onclick="openVetSlot('${v.id}')">
+      <div class="vt"><span class="serif" style="font-size:16px">${v.label}</span>${funded?'<span class="badge b-ok">Funded</span>':`<span class="badge b-pend">${Math.round(pct)}%</span>`}</div>
+      <div class="minitrack"><div class="minifill" style="width:${pct}%"></div></div>
+      <div class="vc">${fmt(raised)} of ${fmt(v.goal_amount)} · ${contribs.length} co-sponsors</div>
+      <div class="vsub">${names||'No contributions yet'}</div>
+    </div>`;
+  }).join('')+`<div class="vetcard" style="display:flex;align-items:center;justify-content:center;border-style:dashed;cursor:pointer" onclick="addVetSlot()"><span style="color:var(--muted)">+ Add veteran slot</span></div>`;
+}
+
+function renderContractMetrics(){
+  const live=contracts.filter(c=>!['awarded','lost'].includes(c.stage));
+  const val=live.reduce((s,c)=>s+(+c.value||0),0);
+  const submitted=contracts.filter(c=>c.stage==='submitted').length;
+  const openTasks=tasks.filter(t=>t.status!=='done').length;
+  document.getElementById('contract-metrics').innerHTML=[
+    ['Live pursuits',live.length],['Pipeline value',fmtK(val)],['Submitted',submitted],['Open tasks',openTasks]
+  ].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
+}
+function renderContracts(){
+  renderContractMetrics();
+  const q=(document.getElementById('cf-search').value||'').toLowerCase();
+  const fs=document.getElementById('cf-stage').value;
+  let list=contracts.filter(c=>{
+    if(q&&!(c.name.toLowerCase().includes(q)||(c.agency||'').toLowerCase().includes(q)))return false;
+    if(fs&&c.stage!==fs)return false;return true;
+  });
+  const host=document.getElementById('contract-list');
+  if(!list.length){host.innerHTML='<div class="empty">No contracts match.</div>';return;}
+  host.innerHTML=list.map(c=>{
+    const b=c.stage==='awarded'?'b-ok':c.stage==='lost'?'b-risk':'b-stage';
+    return `<div class="row" onclick="openContract('${c.id}')">
+      <div class="avatar">${(c.agency||'?').slice(0,3).toUpperCase()}</div>
+      <div class="main"><div class="rn">${c.name}</div>
+      <div class="rs"><span class="badge ${b}">${CSTAGES[c.stage]}</span> · ${c.agency||'—'}${c.next_action?' · next: '+c.next_action:''}</div></div>
+      <div class="amt"><div class="a1">${c.value?fmtK(c.value):'—'}</div><div class="a2">${rosterName(c.owner_id)}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function openModal(html){document.getElementById('modal').innerHTML=html;document.getElementById('overlay').classList.add('open');}
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+
+function openDonor(id){
+  const d=donors.find(x=>x.id===id);const tk=donorTierKey(d);
+  const obl=obligations.filter(o=>o.donor_id===id);
+  const notes=donor_notes.filter(n=>n.donor_id===id).sort((a,b)=>b.created_at.localeCompare(a.created_at));
+  openModal(`
+    <div class="mhead"><div class="avatar">${initials(d.name)}</div>
+      <div class="mt"><h3>${d.name}</h3><div class="msub">${d.type==='organization'?'Organization':'Individual'} · ${TIERS[tk].name}${d.tier?'':' (target)'}</div></div>
+      <button class="btn btn-outline btn-sm" onclick="openDonorForm('${d.id}')">Edit</button>
+      <button class="close" onclick="closeModal()">×</button></div>
+    <div class="mbody">
+      <div class="kv"><span class="k">Stage</span><span class="v">${STAGES[d.stage]}${d.stage==='passed'?' · '+(d.passed_reason==='not_interested'?'not interested':'revisit later'):''}</span></div>
+      <div class="kv"><span class="k">Pledged</span><span class="v">${fmt(d.amount_pledged||0)}</span></div>
+      <div class="kv"><span class="k">Received</span><span class="v">${fmt(d.amount_received||0)}</span></div>
+      ${d.primary_contact?`<div class="kv"><span class="k">Primary contact</span><span class="v"><span class="link" onclick="donorPrimaryContact('${d.id}')">${d.primary_contact}</span></span></div>`:''}
+      <div class="kv"><span class="k">Relationship owner</span><span class="v"><span class="link" onclick="openLead('${d.owner_id}')">${rosterName(d.owner_id)}</span></span></div>
+      ${d.type==='organization'?`<div class="kv"><span class="k">Organization card</span><span class="v"><span class="link" onclick="openOrgByName('${qq(d.name)}')">Open</span></span></div>`:''}
+      ${d.source?`<div class="kv"><span class="k">Source</span><span class="v">${d.source}</span></div>`:''}
+      <div class="mlabel">Recognition &amp; obligations</div>
+      ${obl.length?obl.map(o=>`<div class="obl ${o.status==='done'?'done':''}"><div class="ob-check" onclick="toggleObl('${o.id}')">${o.status==='done'?'✓':''}</div><div class="ob-text">${o.item}</div><div class="meta">${o.status==='done'?'done':o.due_date?'due '+o.due_date:o.status}</div></div>`).join(''):'<div class="empty" style="padding:10px">No obligations yet. Commit this donor to generate their tier package.</div>'}
+      ${d.tier&&obl.length<(OBLIGATIONS[d.tier]||[]).length?`<button class="btn btn-ghost btn-sm" onclick="genObligations('${d.id}')">+ Generate ${TIERS[d.tier].name} package</button>`:''}
+      <div class="mlabel">Notes</div>
+      <div class="addnote"><input id="new-note" placeholder="Add a note"><button class="btn btn-outline btn-sm" onclick="addNote('${d.id}')">Add</button></div>
+      ${notes.length?notes.map(n=>`<div class="note">${n.body}<div class="nmeta">${n.author||'—'} · ${n.created_at}</div></div>`).join(''):'<div class="empty" style="padding:10px">No notes yet.</div>'}
+    </div>`);
+}
+function donorPrimaryContact(did){
+  const d=donors.find(x=>x.id===did);if(!d||!d.primary_contact)return;
+  if(d.primary_contact_id){const ex=contacts.find(c=>c.id===d.primary_contact_id);if(ex)return openContact(d.primary_contact_id);}
+  const match=contacts.find(c=>c.name.toLowerCase()===d.primary_contact.toLowerCase());
+  if(match){d.primary_contact_id=match.id;P.update('donors',did,{primary_contact_id:match.id});return openContact(match.id);}
+  const id=nid('ct');const rec={id,name:d.primary_contact,org:d.type==='organization'?d.name:'',category:'Donor contact'};contacts.push(rec);P.insert('contacts',rec);d.primary_contact_id=id;P.update('donors',did,{primary_contact_id:id});openContact(id);
+}
+function toggleObl(oid){
+  const o=obligations.find(x=>x.id===oid);
+  if(o.status==='done'){ if(!confirm('Are you sure you want to uncheck this item?'))return; o.status='pending'; }
+  else o.status='done';
+  P.update('donor_obligations',oid,{status:o.status});
+  openDonor(o.donor_id);renderHome();
+}
+function genObligations(did){const d=donors.find(x=>x.id===did);(OBLIGATIONS[d.tier]||[]).forEach(item=>{if(!obligations.find(o=>o.donor_id===did&&o.item===item)){const rec={id:nid('o'),donor_id:did,item,tier:d.tier,status:'pending'};obligations.push(rec);P.insert('donor_obligations',rec);}});openDonor(did);}
+function addNote(did){const v=document.getElementById('new-note').value.trim();if(!v)return;const rec={id:nid('n'),donor_id:did,author:'Chris',body:v,created_at:new Date().toISOString().slice(0,10)};donor_notes.push(rec);P.insert('donor_notes',rec);openDonor(did);}
+
+function donorFormFields(d){
+  d=d||{};
+  const opt=(o,cur)=>Object.entries(o).map(([k,v])=>`<option value="${k}" ${cur===k?'selected':''}>${v.name||v}</option>`).join('');
+  return `
+  <div class="field"><label>Name</label><input id="fd-name" value="${d.name||''}"></div>
+  <div class="two">
+    <div class="field"><label>Type</label><select id="fd-type"><option value="organization" ${d.type==='organization'?'selected':''}>Organization</option><option value="individual" ${d.type==='individual'?'selected':''}>Individual</option></select></div>
+    <div class="field"><label>Owner</label><select id="fd-owner">${roster.map(r=>`<option value="${r.id}" ${d.owner_id===r.id?'selected':''}>${r.name}</option>`).join('')}</select></div>
+  </div>
+  <div class="two">
+    <div class="field"><label>Committed tier</label><select id="fd-tier"><option value="">— none —</option>${Object.entries(TIERS).map(([k,v])=>`<option value="${k}" ${d.tier===k?'selected':''}>${v.name}</option>`).join('')}</select></div>
+    <div class="field"><label>Target tier</label><select id="fd-target"><option value="">— none —</option>${Object.entries(TIERS).map(([k,v])=>`<option value="${k}" ${d.target_tier===k?'selected':''}>${v.name}</option>`).join('')}</select></div>
+  </div>
+  <div class="two">
+    <div class="field"><label>Stage</label><select id="fd-stage">${Object.entries(STAGES).map(([k,v])=>`<option value="${k}" ${d.stage===k?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="field"><label>Source</label><input id="fd-source" value="${d.source||''}"></div>
+  </div>
+  <div class="two">
+    <div class="field"><label>Amount pledged</label><input id="fd-pledged" type="number" value="${d.amount_pledged||0}"></div>
+    <div class="field"><label>Amount received</label><input id="fd-received" type="number" value="${d.amount_received||0}"></div>
+  </div>
+  <div class="field"><label>Primary contact (for organizations)</label><input id="fd-contact" value="${d.primary_contact||''}"></div>`;
+}
+function openDonorForm(id){
+  const d=id?donors.find(x=>x.id===id):null;
+  openModal(`<div class="mhead"><div class="mt"><h3>${id?'Edit donor':'Add donor'}</h3><div class="msub">Organization or individual</div></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="mbody">${donorFormFields(d)}<div class="mfoot"><button class="btn btn-outline btn-sm" onclick="${id?`openDonor('${id}')`:'closeModal()'}">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveDonor('${id||''}')">Save donor</button></div></div>`);
+}
+function saveDonor(id){
+  const g=x=>document.getElementById(x).value;
+  const name=g('fd-name').trim();if(!name){alert('Name required');return;}
+  const data={name,type:g('fd-type'),tier:g('fd-tier')||null,target_tier:g('fd-target')||null,stage:g('fd-stage'),source:g('fd-source'),amount_pledged:+g('fd-pledged')||0,amount_received:+g('fd-received')||0,primary_contact:g('fd-contact'),owner_id:g('fd-owner')};
+  if(id){Object.assign(donors.find(x=>x.id===id),data);P.update('donors',id,data);openDonor(id);}
+  else{const rec={id:nid('d'),...data};donors.push(rec);P.insert('donors',rec);closeModal();}
+  renderDonors();renderProspects();renderHome();renderVets();
+}
+
+function taskRow(t){
+  const done=t.status==='done';
+  const meta=done
+    ? 'Completed by '+rosterName(t.completed_by)+(t.completed_at?' · '+fmtDT(t.completed_at):'')
+    : 'Assigned to '+rosterName(t.assignee_id)+(t.due_at?' · due '+fmtDT(t.due_at):'');
+  return `<div class="taskrow ${done?'done':''}"><div class="tcheck" onclick="toggleTask('${t.id}')">${done?'✓':''}</div><div class="ttext" style="flex:1">${t.title}</div><div class="meta">${meta}</div></div>`;
+}
+function openContract(id){
+  const c=contracts.find(x=>x.id===id);
+  const notes=contract_notes.filter(n=>n.contract_id===id).sort((a,b)=>b.created_at.localeCompare(a.created_at));
+  const links=contract_contacts.filter(x=>x.contract_id===id);
+  const ctasks=tasks.filter(t=>t.contract_id===id);
+  const docs=contract_documents.filter(d=>d.contract_id===id).sort((a,b)=>b.created_at.localeCompare(a.created_at));
+  openModal(`
+    <div class="mhead"><div class="avatar">${(c.agency||'?').slice(0,3).toUpperCase()}</div>
+    <div class="mt"><h3>${c.name}</h3><div class="msub">${c.agency||'—'} · ${CSTAGES[c.stage]}</div></div>
+    <button class="btn btn-outline btn-sm" onclick="openContractForm('${c.id}')">Edit</button>
+    <button class="close" onclick="closeModal()">×</button></div>
+    <div class="mbody">
+      <div class="kv"><span class="k">Value</span><span class="v">${c.value?fmt(c.value):'—'}</span></div>
+      <div class="kv"><span class="k">Acquisition path</span><span class="v">${c.acquisition_path||'—'}</span></div>
+      <div class="kv"><span class="k">Next action</span><span class="v">${c.next_action||'—'}${c.next_action_date?' ('+c.next_action_date+')':''}</span></div>
+      <div class="kv"><span class="k">Internal lead</span><span class="v"><span class="link" onclick="openLead('${c.owner_id}')">${rosterName(c.owner_id)}</span></span></div>
+      <div class="mlabel">Contacts</div>
+      ${links.length?links.map(l=>{const ct=contacts.find(x=>x.id===l.contact_id);return `<div class="kv"><span class="k">${l.role||'Contact'}</span><span class="v"><span class="link" onclick="openContact('${l.contact_id}')">${ct?ct.name:'—'}</span>${ct&&ct.org?' <span class="rolechip">'+ct.org+'</span>':''}</span></div>`;}).join(''):'<div class="empty" style="padding:8px">No contacts linked yet.</div>'}
+      <div class="addnote"><select id="link-contact"><option value="">Link existing contact…</option>${contacts.map(ct=>`<option value="${ct.id}">${ct.name}${ct.org?' — '+ct.org:''}</option>`).join('')}</select><input id="link-role" placeholder="Role" style="max-width:130px"><button class="btn btn-outline btn-sm" onclick="linkContact('${c.id}')">Link</button></div>
+      <button class="btn btn-ghost btn-sm" onclick="openContactForm(null,'${c.id}')">+ New contact</button>
+      <div class="mlabel">Tasks</div>
+      <div class="addnote"><input id="new-task" placeholder="Add a task"><input id="new-task-due" type="datetime-local" title="Due date and time" style="max-width:190px"><button class="btn btn-outline btn-sm" onclick="addTask('${c.id}')">Add</button></div>
+      ${ctasks.length?ctasks.map(taskRow).join(''):'<div class="empty" style="padding:8px">No tasks.</div>'}
+      <div class="mlabel">Documents</div>
+      <div class="addnote"><input id="new-doc" placeholder="Document name"><input id="new-doc-url" placeholder="Link (optional)" style="max-width:140px"><button class="btn btn-outline btn-sm" onclick="addDoc('${c.id}')">Add</button></div>
+      ${docs.length?docs.map(d=>`<div class="docrow"><span style="color:var(--gold)" aria-hidden="true">▤</span><div style="flex:1">${d.name}</div>${d.url?`<a class="btn btn-outline btn-sm" href="${d.url}" target="_blank" rel="noopener">Open</a>`:`<button class="btn btn-outline btn-sm" onclick="addDocLink('${d.id}','${c.id}')">Add link</button>`}</div>`).join(''):'<div class="empty" style="padding:8px">No documents yet.</div>'}
+      <div class="mlabel">Notes</div>
+      <div class="addnote"><input id="new-cnote" placeholder="Add a note"><button class="btn btn-outline btn-sm" onclick="addCNote('${c.id}')">Add</button></div>
+      ${notes.length?notes.map(n=>`<div class="note">${n.body}<div class="nmeta">${n.author||'—'} · ${n.created_at}</div></div>`).join(''):'<div class="empty" style="padding:8px">No notes yet.</div>'}
+    </div>`);
+}
+function toggleTask(tid){
+  const t=tasks.find(x=>x.id===tid);
+  if(t.status==='done'){
+    if(!confirm('Are you sure you want to uncheck this task?'))return;
+    t.status='open';t.completed_by=null;t.completed_at=null;
+  }else{
+    t.status='done';t.completed_by=OWNER();t.completed_at=new Date().toISOString();
+  }
+  P.update('tasks',t.id,{status:t.status,completed_by:t.completed_by,completed_at:t.completed_at});
+  openContract(t.contract_id);renderContracts();renderHome();
+}
+function addTask(cid){const v=document.getElementById('new-task').value.trim();if(!v)return;const due=document.getElementById('new-task-due').value;const rec={id:nid('t'),title:v,contract_id:cid,assignee_id:OWNER(),status:'open',priority:'normal',due_at:due||null,blocked_by:[]};tasks.push(rec);P.insert('tasks',rec);openContract(cid);renderContracts();renderHome();}
+function addCNote(cid){const v=document.getElementById('new-cnote').value.trim();if(!v)return;const rec={id:nid('cn'),contract_id:cid,author:'Chris',body:v,created_at:new Date().toISOString().slice(0,10)};contract_notes.push(rec);P.insert('contract_notes',rec);openContract(cid);}
+function addDoc(cid){const n=document.getElementById('new-doc').value.trim();if(!n)return;const url=document.getElementById('new-doc-url').value.trim();const rec={id:nid('doc'),contract_id:cid,name:n,url,uploaded_by:OWNER(),created_at:new Date().toISOString().slice(0,10)};contract_documents.push(rec);P.insert('contract_documents',rec);openContract(cid);}
+function addDocLink(docId,cid){const url=prompt('Paste a link to open this document (Google Drive, SharePoint, etc.)');if(url&&url.trim()){const d=contract_documents.find(x=>x.id===docId);d.url=url.trim();P.update('contract_documents',docId,{url:d.url});openContract(cid);}}
+
+function openLead(id){
+  const r=roster.find(x=>x.id===id);if(!r)return;
+  openModal(`<div class="mhead"><div class="avatar">${initials(r.name)}</div><div class="mt"><h3>${r.name}</h3><div class="msub">${r.role||'Team member'}</div></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="mbody">
+    <div class="kv"><span class="k">Role</span><span class="v">${r.role||'—'}</span></div>
+    ${r.org?`<div class="kv"><span class="k">Organization</span><span class="v"><span class="link" onclick="openOrgByName('${qq(r.org)}')">${r.org}</span></span></div>`:''}
+    ${r.office?`<div class="kv"><span class="k">Office</span><span class="v">${r.office}</span></div>`:''}
+    ${r.phone?`<div class="kv"><span class="k">Phone</span><span class="v"><a class="link" href="tel:${r.phone}">${r.phone}</a></span></div>`:''}
+    ${r.email?`<div class="kv"><span class="k">Email</span><span class="v"><a class="link" href="mailto:${r.email}">${r.email}</a></span></div>`:''}
+    <p style="color:var(--text2);font-size:12.5px;margin-top:14px">Internal lead is the team member responsible for driving this contract forward — proposals, follow-ups, and next actions are theirs to move.</p>
+  </div>`);
+}
+function openContact(id){
+  const c=contacts.find(x=>x.id===id);if(!c)return;
+  const row=(k,v,link)=>v?`<div class="kv"><span class="k">${k}</span><span class="v">${link?link(v):v}</span></div>`:'';
+  const notes=contact_notes.filter(n=>n.contact_id===id).sort((a,b)=>b.created_at.localeCompare(a.created_at));
+  openModal(`<div class="mhead"><div class="avatar">${initials(c.name)}</div>
+    <div class="mt"><h3>${c.name}</h3><div class="msub">${[c.title,c.org].filter(Boolean).join(', ')||c.category||'Contact'}</div></div>
+    <button class="btn btn-outline btn-sm" onclick="openContactForm('${c.id}')">Edit</button>
+    <button class="close" onclick="closeModal()">×</button></div>
+    <div class="tabbar">
+      <button class="tab active" data-ct="details" onclick="contactTab('details')">Details</button>
+      <button class="tab" data-ct="notes" onclick="contactTab('notes')">Notes${notes.length?' ('+notes.length+')':''}</button>
+    </div>
+    <div class="mbody">
+      <div id="ct-details">
+        ${row('Category',c.category)}
+        ${c.org?`<div class="kv"><span class="k">Organization</span><span class="v"><span class="link" onclick="openOrgByName('${qq(c.org)}')">${c.org}</span></span></div>`:''}
+        ${row('Primary office',c.office)}
+        ${row('Region / territory',c.region)}
+        ${row('Physical address',c.address)}
+        ${row('Mailing address',c.mailing)}
+        ${row('Phone',c.phone,v=>`<a class="link" href="tel:${v}">${v}</a>`)}
+        ${row('Mobile',c.mobile,v=>`<a class="link" href="tel:${v}">${v}</a>`)}
+        ${row('Fax',c.fax)}
+        ${row('Email',c.email,v=>`<a class="link" href="mailto:${v}">${v}</a>`)}
+        ${row('Alternate email',c.alt_email,v=>`<a class="link" href="mailto:${v}">${v}</a>`)}
+        ${row('Website',c.website,v=>`<a class="link" href="${v}" target="_blank" rel="noopener">${v.replace(/^https?:\/\//,'')}</a>`)}
+        ${row('LinkedIn / social',c.linkedin,v=>`<a class="link" href="${v}" target="_blank" rel="noopener">${v.replace(/^https?:\/\//,'')}</a>`)}
+        ${row('Assistant / scheduler',c.assistant)}
+        ${row('Preferred contact',c.preferred)}
+        ${row('Last contacted',c.last_contacted)}
+        ${c.notes?`<div class="mlabel">Summary / background</div><div class="note">${c.notes}</div>`:''}
+        <div class="mlabel">Linked contracts</div>
+        ${linkedContractsFor(c.id)}
+      </div>
+      <div id="ct-notes" style="display:none">
+        <div class="addnote"><input id="new-contactnote" placeholder="Add a note about this contact"><button class="btn btn-outline btn-sm" onclick="addContactNote('${c.id}')">Add</button></div>
+        ${notes.length?notes.map(n=>`<div class="note">${n.body}<div class="nmeta">${n.author||'—'} · ${n.created_at}</div></div>`).join(''):'<div class="empty" style="padding:12px">No notes yet. Add the first one above.</div>'}
+      </div>
+    </div>`);
+}
+function contactTab(t){
+  document.getElementById('ct-details').style.display=t==='details'?'':'none';
+  document.getElementById('ct-notes').style.display=t==='notes'?'':'none';
+  document.querySelectorAll('.tabbar .tab').forEach(b=>b.classList.toggle('active',b.dataset.ct===t));
+}
+function addContactNote(cid){const v=document.getElementById('new-contactnote').value.trim();if(!v)return;const rec={id:nid('kn'),contact_id:cid,author:'Chris',body:v,created_at:new Date().toISOString().slice(0,10)};contact_notes.push(rec);P.insert('contact_notes',rec);openContact(cid);contactTab('notes');}
+function linkedContractsFor(cid){
+  const ls=contract_contacts.filter(l=>l.contact_id===cid);
+  if(!ls.length)return '<div class="empty" style="padding:8px">None.</div>';
+  return ls.map(l=>{const ct=contracts.find(x=>x.id===l.contract_id);return `<div class="kv"><span class="k">${l.role||'Contact'}</span><span class="v"><span class="link" onclick="openContract('${l.contract_id}')">${ct?ct.name:'—'}</span></span></div>`;}).join('');
+}
+function openContactForm(id,ctx){
+  const c=id?contacts.find(x=>x.id===id):{};
+  openModal(`<div class="mhead"><div class="mt"><h3>${id?'Edit contact':'New contact'}</h3><div class="msub">Central contact record</div></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="mbody">
+    <div class="field"><label>Name</label><input id="k-name" value="${c.name||''}"></div>
+    <div class="two"><div class="field"><label>Title</label><input id="k-title" value="${c.title||''}"></div><div class="field"><label>Organization</label><input id="k-org" value="${c.org||''}"></div></div>
+    <div class="two"><div class="field"><label>Category</label><input id="k-cat" value="${c.category||''}" placeholder="Contracting officer, Lobbyist / BD..."></div><div class="field"><label>Primary office</label><input id="k-office" value="${c.office||''}"></div></div>
+    <div class="field"><label>Physical address</label><input id="k-addr" value="${c.address||''}"></div>
+    <div class="two"><div class="field"><label>Phone</label><input id="k-phone" value="${c.phone||''}"></div><div class="field"><label>Fax</label><input id="k-fax" value="${c.fax||''}"></div></div>
+    <div class="two"><div class="field"><label>Email</label><input id="k-email" value="${c.email||''}"></div><div class="field"><label>Website</label><input id="k-web" value="${c.website||''}"></div></div>
+    <div class="two"><div class="field"><label>Mobile</label><input id="k-mobile" value="${c.mobile||''}"></div><div class="field"><label>Alternate email</label><input id="k-alt" value="${c.alt_email||''}"></div></div>
+    <div class="two"><div class="field"><label>Region / territory</label><input id="k-region" value="${c.region||''}"></div><div class="field"><label>Preferred contact</label><input id="k-pref" value="${c.preferred||''}" placeholder="Email, phone, text"></div></div>
+    <div class="field"><label>Mailing address (if different)</label><input id="k-mail" value="${c.mailing||''}"></div>
+    <div class="two"><div class="field"><label>Assistant / scheduler</label><input id="k-asst" value="${c.assistant||''}"></div><div class="field"><label>LinkedIn / social</label><input id="k-linked" value="${c.linkedin||''}"></div></div>
+    <div class="field"><label>Last contacted</label><input id="k-last" type="date" value="${c.last_contacted||''}"></div>
+    ${!id&&ctx?`<div class="field"><label>Role on this contract</label><input id="k-role" placeholder="Contracting officer, Lobbyist / BD..."></div>`:''}
+    <div class="field"><label>Summary / background</label><textarea id="k-notes">${c.notes||''}</textarea></div>
+    <div class="mfoot"><button class="btn btn-outline btn-sm" onclick="${id?`openContact('${id}')`:(ctx?`openContract('${ctx}')`:'closeModal()')}">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveContact('${id||''}','${ctx||''}')">Save contact</button></div>
+  </div>`);
+}
+function saveContact(id,ctx){
+  const g=x=>document.getElementById(x).value;
+  const name=g('k-name').trim();if(!name){alert('Name required');return;}
+  const data={name,title:g('k-title'),org:g('k-org'),category:g('k-cat'),office:g('k-office'),address:g('k-addr'),phone:g('k-phone'),fax:g('k-fax'),email:g('k-email'),website:g('k-web'),mobile:g('k-mobile'),alt_email:g('k-alt'),region:g('k-region'),preferred:g('k-pref'),mailing:g('k-mail'),assistant:g('k-asst'),linkedin:g('k-linked'),last_contacted:g('k-last'),notes:g('k-notes')};
+  if(id){Object.assign(contacts.find(x=>x.id===id),data);P.update('contacts',id,data);openContact(id);}
+  else{
+    const newId=nid('ct');const rec={id:newId,...data};contacts.push(rec);P.insert('contacts',rec);
+    if(ctx){const roleEl=document.getElementById('k-role');const role=(roleEl&&roleEl.value.trim())||'Contact';const link={id:nid('cl'),contract_id:ctx,contact_id:newId,role};contract_contacts.push(link);P.insert('contract_contacts',link);openContract(ctx);}
+    else closeModal();
+  }
+  renderContracts();
+}
+function linkContact(cid){
+  const sel=document.getElementById('link-contact').value;
+  const role=document.getElementById('link-role').value.trim()||'Contact';
+  if(!sel){alert('Choose a contact to link');return;}
+  if(contract_contacts.find(l=>l.contract_id===cid&&l.contact_id===sel)){alert('That contact is already linked');return;}
+  const link={id:nid('cl'),contract_id:cid,contact_id:sel,role};contract_contacts.push(link);P.insert('contract_contacts',link);
+  openContract(cid);
+}
+function openContractForm(id){
+  const c=id?contracts.find(x=>x.id===id):{};
+  openModal(`<div class="mhead"><div class="mt"><h3>${id?'Edit contract':'Add contract'}</h3><div class="msub">Government or research opportunity</div></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="mbody">
+    <div class="field"><label>Opportunity name</label><input id="fc-name" value="${c.name||''}"></div>
+    <div class="two"><div class="field"><label>Agency</label><input id="fc-agency" value="${c.agency||''}" placeholder="DoD, SOCOM, CENTCOM, VA"></div>
+    <div class="field"><label>Stage</label><select id="fc-stage">${Object.entries(CSTAGES).map(([k,v])=>`<option value="${k}" ${c.stage===k?'selected':''}>${v}</option>`).join('')}</select></div></div>
+    <div class="two"><div class="field"><label>Value</label><input id="fc-value" type="number" value="${c.value||''}"></div>
+    <div class="field"><label>Internal lead</label><select id="fc-owner">${roster.map(r=>`<option value="${r.id}" ${c.owner_id===r.id?'selected':''}>${r.name}</option>`).join('')}</select></div></div>
+    <div class="field"><label>Acquisition path</label><input id="fc-path" value="${c.acquisition_path||''}" placeholder="Direct prime, sub under Rise8..."></div>
+    <div class="two"><div class="field"><label>Next action</label><input id="fc-next" value="${c.next_action||''}"></div><div class="field"><label>Next action date</label><input id="fc-nextdate" type="date" value="${c.next_action_date||''}"></div></div>
+    <div class="mfoot"><button class="btn btn-outline btn-sm" onclick="${id?`openContract('${id}')`:'closeModal()'}">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveContract2('${id||''}')">Save contract</button></div>
+  </div>`);
+}
+function saveContract2(id){
+  const g=x=>document.getElementById(x).value;
+  const name=g('fc-name').trim();if(!name){alert('Name required');return;}
+  const data={name,agency:g('fc-agency'),stage:g('fc-stage'),value:+g('fc-value')||0,acquisition_path:g('fc-path'),next_action:g('fc-next'),next_action_date:g('fc-nextdate'),owner_id:g('fc-owner')};
+  if(id){Object.assign(contracts.find(x=>x.id===id),data);P.update('contracts',id,data);openContract(id);}
+  else{const rec={id:nid('c'),...data};contracts.push(rec);P.insert('contracts',rec);closeModal();}
+  renderContracts();renderHome();
+}
+function addVetSlot(){const rec={id:nid('v'),label:'Veteran slot #'+(vet_slots.length+1),goal_amount:VET_COST,status:'open'};vet_slots.push(rec);P.insert('veteran_slots',rec);renderVets();}
+function openVetSlot(id){
+  const v=vet_slots.find(x=>x.id===id);
+  const contribs=vet_contribs.filter(c=>c.slot_id===id);
+  const raised=slotRaised(id);const pct=Math.min(100,raised/v.goal_amount*100);const funded=raised>=v.goal_amount;
+  openModal(`<div class="mhead"><div class="avatar">⬡</div>
+    <div class="mt"><h3>${v.label}</h3><div class="msub">${fmt(raised)} of ${fmt(v.goal_amount)} · ${contribs.length} co-sponsors</div></div>
+    <button class="close" onclick="closeModal()">×</button></div>
+    <div class="mbody">
+      <div class="minitrack" style="height:12px"><div class="minifill" style="width:${pct}%"></div></div>
+      <div class="meta" style="text-align:left;margin:6px 0 4px">${funded?'Fully sponsored':Math.round(pct)+'% funded · '+fmt(Math.max(0,v.goal_amount-raised))+' to go'}</div>
+      <div class="mlabel">Co-sponsors</div>
+      ${contribs.length?contribs.map(c=>`<div class="kv"><span class="k">${c.donor_id?`<span class="link" onclick="openDonor('${c.donor_id}')">${c.contributor_name}</span>`:c.contributor_name}</span><span class="v">${fmt(c.amount)}</span></div>`).join(''):'<div class="empty" style="padding:8px">No sponsors yet.</div>'}
+      <div class="mlabel">Add a sponsor</div>
+      <div class="two">
+        <div class="field"><label>Existing donor</label><select id="vs-donor" onchange="vsFill()"><option value="">— or type a name —</option>${donors.map(d=>`<option value="${d.id}">${d.name}</option>`).join('')}</select></div>
+        <div class="field"><label>Amount</label><input id="vs-amt" type="number" value="5000"></div>
+      </div>
+      <div class="field"><label>Sponsor name</label><input id="vs-name" placeholder="Sponsor name"></div>
+      <div class="mfoot"><button class="btn btn-primary btn-sm" onclick="addSponsor('${id}')">Add sponsor</button></div>
+    </div>`);
+}
+function vsFill(){const sel=document.getElementById('vs-donor').value;const d=donors.find(x=>x.id===sel);document.getElementById('vs-name').value=d?d.name:'';}
+function addSponsor(sid){
+  const sel=document.getElementById('vs-donor').value;
+  const name=document.getElementById('vs-name').value.trim()||(sel?donors.find(d=>d.id===sel).name:'');
+  const amt=+document.getElementById('vs-amt').value||0;
+  if(!name){alert('Enter a sponsor name or pick a donor');return;}
+  const rec={id:nid('vc'),slot_id:sid,donor_id:sel||null,contributor_name:name,amount:amt};vet_contribs.push(rec);P.insert('veteran_contributions',rec);
+  const v=vet_slots.find(x=>x.id===sid);const raised=slotRaised(sid);v.status=raised>=v.goal_amount?'funded':raised>0?'partial':'open';P.update('veteran_slots',sid,{status:v.status});
+  openVetSlot(sid);renderVets();renderHome();
+}
+
+const NOW=new Date('2026-07-06T08:00');
+function taskGated(t){return (t.blocked_by||[]).some(bid=>{const b=tasks.find(x=>x.id===bid);return b&&b.status!=='done';});}
+function isOverdue(t){return t.status!=='done'&&t.due_at&&new Date(t.due_at)<NOW;}
+function taskFullRow(t){
+  const done=t.status==='done';const gated=!done&&taskGated(t);
+  const blockers=(t.blocked_by||[]).map(bid=>tasks.find(x=>x.id===bid)).filter(b=>b&&b.status!=='done');
+  const cname=t.contract_id?((contracts.find(c=>c.id===t.contract_id)||{}).name||''):'';
+  let meta;
+  if(done)meta='Completed by '+rosterName(t.completed_by)+(t.completed_at?' · '+fmtDT(t.completed_at):'');
+  else meta='Assigned to <span class="link" onclick="event.stopPropagation();openLead(\''+t.assignee_id+'\')">'+rosterName(t.assignee_id)+'</span>'+(t.due_at?' · due '+fmtDT(t.due_at)+(isOverdue(t)?' (overdue)':''):'');
+  const pill=done?'<span class="badge b-ok">Done</span>':gated?'<span class="badge b-pend">Gated</span>':t.status==='in_progress'?'<span class="badge b-stage">In progress</span>':'';
+  return `<div class="taskrow ${done?'done':''}">
+    <div class="tcheck ${gated?'locked':''}" onclick="${gated&&!done?`gatedAlert('${t.id}')`:`toggleFullTask('${t.id}')`}">${done?'✓':''}</div>
+    <div style="flex:1;min-width:0">
+      <div class="ttext" onclick="openTaskForm('${t.id}')" style="cursor:pointer">${t.title} ${t.priority==='urgent'?'<span class="badge b-risk">urgent</span>':''} ${pill} ${cname?'<span class="rolechip">'+cname+'</span>':''}</div>
+      <div class="meta" style="text-align:left">${meta}${gated&&blockers.length?' · waiting on '+blockers.map(b=>b.title).join(', '):''}</div>
+    </div>
+  </div>`;
+}
+function gatedAlert(tid){const t=tasks.find(x=>x.id===tid);const b=(t.blocked_by||[]).map(x=>tasks.find(y=>y.id===x)).filter(x=>x&&x.status!=='done');alert('This task is gated. Finish first: '+b.map(x=>x.title).join(', '));}
+function toggleFullTask(tid){
+  const t=tasks.find(x=>x.id===tid);
+  if(t.status==='done'){ if(!confirm('Are you sure you want to uncheck this task?'))return; t.status='open';t.completed_by=null;t.completed_at=null; }
+  else { if(taskGated(t)){gatedAlert(tid);return;} t.status='done';t.completed_by=OWNER();t.completed_at=new Date().toISOString(); }
+  P.update('tasks',tid,{status:t.status,completed_by:t.completed_by,completed_at:t.completed_at});
+  renderTasks();renderHome();renderContracts();
+}
+function filterAssignee(id){document.getElementById('tf-assignee').value=id;renderTasks();}
+function renderTasks(){
+  const fa=document.getElementById('tf-assignee');
+  if(fa&&fa.options.length<=1)fa.innerHTML='<option value="">Whole team</option>'+roster.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  const aSel=fa?fa.value:'';const sSel=document.getElementById('tf-status')?document.getElementById('tf-status').value:'';
+  const open=tasks.filter(t=>t.status!=='done').length;
+  const overdue=tasks.filter(isOverdue).length;
+  const gated=tasks.filter(t=>t.status!=='done'&&taskGated(t)).length;
+  const done=tasks.filter(t=>t.status==='done').length;
+  document.getElementById('task-metrics').innerHTML=[['Open',open],['Overdue',overdue],['Gated',gated],['Completed',done]].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
+  document.getElementById('team-monitor').innerHTML='<div class="mlabel" style="margin-top:4px">Team monitor</div><div class="cardgrid" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))">'+roster.map(r=>{
+    const my=tasks.filter(t=>t.assignee_id===r.id);const mo=my.filter(t=>t.status!=='done').length;const mov=my.filter(isOverdue).length;const mg=my.filter(t=>t.status!=='done'&&taskGated(t)).length;
+    return `<div class="wcard" style="cursor:pointer" onclick="filterAssignee('${r.id}')"><h3 class="serif" style="font-size:15px">${r.name}${r.is_owner?' <span class="rolechip">owner</span>':''}</h3><p style="min-height:auto;font-size:12px">${r.role||''}</p><div class="stat">${mo}</div><div class="statl">Open${mov?' · '+mov+' overdue':''}${mg?' · '+mg+' gated':''}</div></div>`;
+  }).join('')+'</div>';
+  let list=tasks.filter(t=>{
+    if(aSel&&t.assignee_id!==aSel)return false;
+    if(sSel==='gated'){if(t.status==='done'||!taskGated(t))return false;}
+    else if(sSel&&t.status!==sSel)return false;
+    return true;
+  });
+  const host=document.getElementById('task-list');
+  if(!list.length){host.innerHTML='<div class="empty">No tasks match.</div>';return;}
+  let html='<div class="mlabel">Tasks by owner</div>';
+  roster.forEach(r=>{
+    const g=list.filter(t=>t.assignee_id===r.id);if(!g.length)return;
+    g.sort((a,b)=>((a.status==='done')-(b.status==='done'))||((a.due_at||'zzz')>(b.due_at||'zzz')?1:-1));
+    html+=`<div class="tiergroup"><div class="tierhead"><span class="tn" style="font-size:15px"><span class="link" onclick="openLead('${r.id}')">${r.name}</span></span><span class="tr">${r.role||''}</span><span class="ta">${g.filter(t=>t.status!=='done').length} open</span></div>`;
+    g.forEach(t=>html+=taskFullRow(t));
+    html+='</div>';
+  });
+  host.innerHTML=html;
+}
+function openTaskForm(id){
+  const t=id?tasks.find(x=>x.id===id):{};
+  const others=tasks.filter(x=>x.id!==id);
+  const dueLocal=t.due_at?String(t.due_at).slice(0,16):'';
+  openModal(`<div class="mhead"><div class="mt"><h3>${id?'Edit task':'Add task'}</h3><div class="msub">Assigned work with optional gating</div></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="mbody">
+    <div class="field"><label>Task</label><input id="tk-title" value="${t.title||''}"></div>
+    <div class="two">
+      <div class="field"><label>Assign to</label><select id="tk-assignee">${roster.map(r=>`<option value="${r.id}" ${t.assignee_id===r.id?'selected':''}>${r.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Priority</label><select id="tk-priority"><option value="normal" ${t.priority!=='urgent'?'selected':''}>Normal</option><option value="urgent" ${t.priority==='urgent'?'selected':''}>Urgent</option></select></div>
+    </div>
+    <div class="two">
+      <div class="field"><label>Due date &amp; time</label><input id="tk-due" type="datetime-local" value="${dueLocal}"></div>
+      <div class="field"><label>Status</label><select id="tk-status"><option value="open" ${(!t.status||t.status==='open')?'selected':''}>Open</option><option value="in_progress" ${t.status==='in_progress'?'selected':''}>In progress</option><option value="done" ${t.status==='done'?'selected':''}>Done</option></select></div>
+    </div>
+    <div class="field"><label>Link to contract (optional)</label><select id="tk-contract"><option value="">— none —</option>${contracts.map(c=>`<option value="${c.id}" ${t.contract_id===c.id?'selected':''}>${c.name}</option>`).join('')}</select></div>
+    <div class="field"><label>Gated by — must finish first (Ctrl/Cmd-click to pick several)</label><select id="tk-blockers" multiple size="4">${others.map(o=>`<option value="${o.id}" ${(t.blocked_by||[]).includes(o.id)?'selected':''}>${o.title} — ${rosterName(o.assignee_id)}</option>`).join('')}</select></div>
+    <div class="mfoot"><button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveTask('${id||''}')">Save task</button></div>
+  </div>`);
+}
+function saveTask(id){
+  const g=x=>document.getElementById(x).value;
+  const title=g('tk-title').trim();if(!title){alert('Task required');return;}
+  const blockers=Array.from(document.getElementById('tk-blockers').selectedOptions).map(o=>o.value);
+  const data={title,assignee_id:g('tk-assignee'),priority:g('tk-priority'),due_at:g('tk-due')||null,status:g('tk-status'),contract_id:g('tk-contract')||null,blocked_by:blockers};
+  if(id){Object.assign(tasks.find(x=>x.id===id),data);P.update('tasks',id,data);}
+  else{const rec={id:nid('t'),...data};tasks.push(rec);P.insert('tasks',rec);}
+  closeModal();renderTasks();renderHome();renderContracts();
+}
+function qq(s){return String(s||'').replace(/\\/g,'').replace(/'/g,"\\'");}
+function orgPeople(name){
+  const n=(name||'').toLowerCase();
+  const cs=contacts.filter(c=>(c.org||'').toLowerCase()===n).map(c=>({kind:'contact',id:c.id,name:c.name,sub:c.title||c.category||''}));
+  const rs=roster.filter(r=>(r.org||'').toLowerCase()===n).map(r=>({kind:'lead',id:r.id,name:r.name,sub:r.role||''}));
+  return cs.concat(rs);
+}
+function renderOrgs(){
+  const host0=document.getElementById('org-list');if(!host0)return;
+  const sb=document.getElementById('of-search');const q=(sb?sb.value:'').toLowerCase();
+  const list=organizations.filter(o=>!q||o.name.toLowerCase().includes(q)||(o.type||'').toLowerCase().includes(q));
+  const host=document.getElementById('org-list');
+  if(!list.length){host.innerHTML='<div class="empty">No organizations yet.</div>';return;}
+  host.innerHTML=list.map(o=>{
+    const ppl=orgPeople(o.name).length;const nn=org_notes.filter(n=>n.org_id===o.id).length;
+    return `<div class="wcard" style="cursor:pointer" onclick="openOrg('${o.id}')"><div class="ic">❖</div><h3 class="serif" style="font-size:16px">${o.name}</h3><p style="min-height:auto;font-size:12px">${o.type||''}</p><div class="statl">${ppl} contact${ppl===1?'':'s'} · ${nn} note${nn===1?'':'s'}</div></div>`;
+  }).join('');
+}
+function openOrgByName(name){
+  let o=organizations.find(x=>x.name.toLowerCase()===String(name).toLowerCase());
+  if(!o){o={id:nid('o'),name:name,type:'',website:'',phone:'',address:'',notes:''};organizations.push(o);P.insert('organizations',o);renderOrgs();}
+  openOrg(o.id);
+}
+function openOrg(id){
+  const o=organizations.find(x=>x.id===id);if(!o)return;
+  const notes=org_notes.filter(n=>n.org_id===id).sort((a,b)=>b.created_at.localeCompare(a.created_at));
+  const people=orgPeople(o.name);
+  const donorRec=donors.find(d=>d.type==='organization'&&d.name.toLowerCase()===o.name.toLowerCase());
+  const row=(k,v,link)=>v?`<div class="kv"><span class="k">${k}</span><span class="v">${link?link(v):v}</span></div>`:'';
+  openModal(`<div class="mhead"><div class="avatar">❖</div>
+    <div class="mt"><h3>${o.name}</h3><div class="msub">${o.type||'Organization'}</div></div>
+    <button class="btn btn-outline btn-sm" onclick="openOrgForm('${o.id}')">Edit</button>
+    <button class="close" onclick="closeModal()">×</button></div>
+    <div class="tabbar"><button class="tab active" data-ot="details" onclick="orgTab('details')">Details</button><button class="tab" data-ot="notes" onclick="orgTab('notes')">Notes${notes.length?' ('+notes.length+')':''}</button></div>
+    <div class="mbody">
+      <div id="og-details">
+        ${row('Type',o.type)}
+        ${row('Website',o.website,v=>`<a class="link" href="${v}" target="_blank" rel="noopener">${v.replace(/^https?:\/\//,'')}</a>`)}
+        ${row('Phone',o.phone,v=>`<a class="link" href="tel:${v}">${v}</a>`)}
+        ${row('Address',o.address)}
+        ${donorRec?`<div class="kv"><span class="k">Funding record</span><span class="v"><span class="link" onclick="openDonor('${donorRec.id}')">${TIERS[donorTierKey(donorRec)].name}</span></span></div>`:''}
+        ${o.notes?`<div class="mlabel">Summary / background</div><div class="note">${o.notes}</div>`:''}
+        <div class="mlabel">People</div>
+        ${people.length?people.map(p=>`<div class="kv"><span class="k"><span class="link" onclick="${p.kind==='lead'?`openLead('${p.id}')`:`openContact('${p.id}')`}">${p.name}</span></span><span class="v">${p.sub}</span></div>`).join(''):'<div class="empty" style="padding:8px">No people linked yet.</div>'}
+      </div>
+      <div id="og-notes" style="display:none">
+        <div class="addnote"><input id="new-orgnote" placeholder="Add a note about this organization"><button class="btn btn-outline btn-sm" onclick="addOrgNote('${o.id}')">Add</button></div>
+        ${notes.length?notes.map(n=>`<div class="note">${n.body}<div class="nmeta">${n.author||'—'} · ${n.created_at}</div></div>`).join(''):'<div class="empty" style="padding:12px">No notes yet.</div>'}
+      </div>
+    </div>`);
+}
+function orgTab(t){document.getElementById('og-details').style.display=t==='details'?'':'none';document.getElementById('og-notes').style.display=t==='notes'?'':'none';document.querySelectorAll('.tabbar .tab').forEach(b=>b.classList.toggle('active',b.dataset.ot===t));}
+function addOrgNote(id){const v=document.getElementById('new-orgnote').value.trim();if(!v)return;const rec={id:nid('on'),org_id:id,author:'Chris',body:v,created_at:new Date().toISOString().slice(0,10)};org_notes.push(rec);P.insert('org_notes',rec);openOrg(id);orgTab('notes');}
+function openOrgForm(id){
+  const o=id?organizations.find(x=>x.id===id):{};
+  openModal(`<div class="mhead"><div class="mt"><h3>${id?'Edit organization':'Add organization'}</h3><div class="msub">Entity record</div></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="mbody">
+    <div class="field"><label>Name</label><input id="og-name" value="${o.name||''}"></div>
+    <div class="field"><label>Type</label><input id="og-type" value="${o.type||''}" placeholder="Foundation, Nonprofit / VSO, Academic, Government relations..."></div>
+    <div class="two"><div class="field"><label>Website</label><input id="og-web" value="${o.website||''}"></div><div class="field"><label>Phone</label><input id="og-phone" value="${o.phone||''}"></div></div>
+    <div class="field"><label>Address</label><input id="og-addr" value="${o.address||''}"></div>
+    <div class="field"><label>Summary / background</label><textarea id="og-notesf">${o.notes||''}</textarea></div>
+    <div class="mfoot"><button class="btn btn-outline btn-sm" onclick="${id?`openOrg('${id}')`:'closeModal()'}">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveOrg('${id||''}')">Save organization</button></div>
+  </div>`);
+}
+function saveOrg(id){
+  const g=x=>document.getElementById(x).value;
+  const name=g('og-name').trim();if(!name){alert('Name required');return;}
+  const data={name,type:g('og-type'),website:g('og-web'),phone:g('og-phone'),address:g('og-addr'),notes:g('og-notesf')};
+  if(id){Object.assign(organizations.find(x=>x.id===id),data);P.update('organizations',id,data);openOrg(id);}
+  else{const rec={id:nid('o'),...data};organizations.push(rec);P.insert('organizations',rec);closeModal();}
+  renderOrgs();renderHome();
+}
+function renderTeam(){
+  document.getElementById('team-list').innerHTML=roster.map(r=>`
+    <div class="wcard" style="cursor:pointer" onclick="openLead('${r.id}')">
+      <div class="avatar" style="margin-bottom:10px">${initials(r.name)}</div>
+      <h3 class="serif" style="font-size:16px">${r.name}${r.is_owner?' <span class="rolechip">owner</span>':''}</h3>
+      <p style="min-height:auto;margin:2px 0 0;font-size:12.5px;color:var(--text2)">${r.role||''}</p>
+      ${r.org?`<p class="link" style="min-height:auto;margin:3px 0 0;font-size:12px" onclick="event.stopPropagation();openOrgByName('${qq(r.org)}')">${r.org}</p>`:'<p style="min-height:auto;margin:3px 0 0;font-size:12px;color:var(--muted)">No organization</p>'}
+    </div>`).join('');
+}
+function openUserForm(id){
+  const r=id?roster.find(x=>x.id===id):{};
+  openModal(`<div class="mhead"><div class="mt"><h3>${id?'Edit teammate':'Add teammate'}</h3><div class="msub">Team member / user</div></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="mbody">
+    <div class="field"><label>Name</label><input id="u-name" value="${r.name||''}"></div>
+    <div class="two"><div class="field"><label>Role</label><input id="u-role" value="${r.role||''}"></div><div class="field"><label>Organization</label><input id="u-org" value="${r.org||''}"></div></div>
+    <div class="two"><div class="field"><label>Login email</label><input id="u-email" value="${r.email||''}"></div><div class="field"><label>Phone</label><input id="u-phone" value="${r.phone||''}"></div></div>
+    <div class="field"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="u-owner" ${r.is_owner?'checked':''} style="width:auto"> Owner — can monitor the whole team</label></div>
+    <div class="mfoot"><button class="btn btn-outline btn-sm" onclick="${id?`openLead('${id}')`:'closeModal()'}">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveUser('${id||''}')">Save teammate</button></div>
+  </div>`);
+}
+function saveUser(id){
+  const g=x=>document.getElementById(x).value;
+  const name=g('u-name').trim();if(!name){alert('Name required');return;}
+  const data={name,role:g('u-role'),org:g('u-org'),email:g('u-email'),phone:g('u-phone'),is_owner:document.getElementById('u-owner').checked};
+  if(id){Object.assign(roster.find(x=>x.id===id),data);P.update('roster',id,data);closeModal();}
+  else{const rec={id:nid('r'),office:'',...data};roster.push(rec);P.insert('roster',rec);closeModal();}
+  renderTeam();renderTasks();renderHome();
+}
+const REF_STATUS={new:'New',screening:'Screening',eligible:'Eligible',enrolled:'Enrolled',not_eligible:'Not eligible',declined:'Declined'};
+function renderReferrals(){
+  const q=(document.getElementById('rf-search').value||'').toLowerCase();
+  const fs=document.getElementById('rf-status').value;
+  let list=referrals.filter(r=>{
+    if(q&&!(r.name.toLowerCase().includes(q)||(r.category||'').toLowerCase().includes(q)||(r.referred_by||'').toLowerCase().includes(q)))return false;
+    if(fs&&r.status!==fs)return false;return true;
+  });
+  document.getElementById('referral-metrics').innerHTML=[['Referrals',referrals.length],['New',referrals.filter(r=>r.status==='new').length],['Screening',referrals.filter(r=>r.status==='screening').length],['Enrolled',referrals.filter(r=>r.status==='enrolled').length]].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
+  const host=document.getElementById('referral-list');
+  if(!list.length){host.innerHTML='<div class="empty">No referrals match.</div>';return;}
+  host.innerHTML=list.map(r=>{
+    const b=r.status==='enrolled'?'b-ok':(r.status==='declined'||r.status==='not_eligible')?'b-risk':'b-stage';
+    return `<div class="row" onclick="openReferral('${r.id}')"><div class="avatar">${initials(r.name)}</div><div class="main"><div class="rn">${r.name}</div><div class="rs"><span class="badge ${b}">${REF_STATUS[r.status]||r.status}</span> · ${r.category||'—'}${r.referred_by?' · via '+r.referred_by:''}</div></div></div>`;
+  }).join('');
+}
+function openReferral(id){
+  const r=referrals.find(x=>x.id===id);if(!r)return;
+  const row=(k,v)=>v?`<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`:'';
+  openModal(`<div class="mhead"><div class="avatar">${initials(r.name)}</div>
+    <div class="mt"><h3>${r.name}</h3><div class="msub">${r.category||'Referral'} · ${REF_STATUS[r.status]||r.status}</div></div>
+    <button class="btn btn-outline btn-sm" onclick="openReferralForm('${r.id}')">Edit</button>
+    <button class="close" onclick="closeModal()">×</button></div>
+    <div class="mbody">
+      ${row('Status',REF_STATUS[r.status]||r.status)}
+      ${row('Category',r.category)}
+      ${row('Referred by',r.referred_by)}
+      ${row('Contact',r.contact)}
+      ${r.notes?`<div class="mlabel">Notes</div><div class="note">${r.notes}</div>`:''}
+    </div>`);
+}
+function openReferralForm(id){
+  const r=id?referrals.find(x=>x.id===id):{};
+  openModal(`<div class="mhead"><div class="mt"><h3>${id?'Edit referral':'Add referral'}</h3><div class="msub">Participant referral</div></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="mbody">
+    <div class="field"><label>Name</label><input id="rk-name" value="${r.name||''}"></div>
+    <div class="two"><div class="field"><label>Category</label><input id="rk-cat" value="${r.category||''}" placeholder="Veteran / SOF, Athlete / NFL, Operator"></div>
+    <div class="field"><label>Status</label><select id="rk-status">${Object.entries(REF_STATUS).map(([k,v])=>`<option value="${k}" ${r.status===k?'selected':''}>${v}</option>`).join('')}</select></div></div>
+    <div class="two"><div class="field"><label>Referred by</label><input id="rk-by" value="${r.referred_by||''}"></div><div class="field"><label>Contact</label><input id="rk-contact" value="${r.contact||''}"></div></div>
+    <div class="field"><label>Notes</label><textarea id="rk-notes">${r.notes||''}</textarea></div>
+    <div class="mfoot"><button class="btn btn-outline btn-sm" onclick="${id?`openReferral('${id}')`:'closeModal()'}">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveReferral('${id||''}')">Save referral</button></div>
+  </div>`);
+}
+function saveReferral(id){
+  const g=x=>document.getElementById(x).value;
+  const name=g('rk-name').trim();if(!name){alert('Name required');return;}
+  const data={name,category:g('rk-cat'),status:g('rk-status'),referred_by:g('rk-by'),contact:g('rk-contact'),notes:g('rk-notes')};
+  if(id){Object.assign(referrals.find(x=>x.id===id),data);P.update('referrals',id,data);openReferral(id);}
+  else{const rec={id:nid('ref'),created_at:new Date().toISOString().slice(0,10),...data};referrals.push(rec);P.insert('referrals',rec);closeModal();}
+  renderReferrals();renderHome();
+}
+window.__renderAll=function(){fillFilterOptions();renderHome();renderProspects();renderDonors();renderVets();renderContracts();renderTasks();renderReferrals();renderTeam();};
+</script>
+<script>
+async function hydrate(){
+  const q=n=>sb.from(n).select('*');
+  const [ros,con,orgs,ornotes,refs,don,dn,obl,vs,vc,ctr,cn,cd,cc,tk]=await Promise.all([
+    q('roster'),q('contacts'),q('organizations'),q('org_notes'),q('referrals'),
+    q('donors'),q('donor_notes'),q('donor_obligations'),q('veteran_slots'),q('veteran_contributions'),
+    q('contracts'),q('contract_notes'),q('contract_documents'),q('contract_contacts'),q('tasks')
+  ]);
+  roster=ros.data||[];contacts=con.data||[];organizations=orgs.data||[];org_notes=ornotes.data||[];referrals=refs.data||[];
+  donors=don.data||[];donor_notes=dn.data||[];obligations=obl.data||[];vet_slots=vs.data||[];vet_contribs=vc.data||[];
+  contracts=ctr.data||[];contract_notes=cn.data||[];contract_documents=cd.data||[];contract_contacts=cc.data||[];tasks=tk.data||[];
+}
+async function boot(){
+  try{ await hydrate(); }catch(e){ document.getElementById('lg-err').textContent='Could not load data. '+(e.message||''); return; }
+  document.getElementById('login-gate').style.display='none';
+  window.__renderAll();
+}
+async function doLogin(){
+  const email=(document.getElementById('lg-email').value||'').trim();
+  const pw=document.getElementById('lg-pw').value||'';
+  const err=document.getElementById('lg-err'); err.textContent='Signing in…';
+  const {error}=await sb.auth.signInWithPassword({email,password:pw});
+  if(error){err.textContent=error.message;return;}
+  err.textContent=''; boot();
+}
+(async function(){
+  const {data}=await sb.auth.getSession();
+  if(data&&data.session){boot();}
+})();
+</script>
+</body>
+</html>
