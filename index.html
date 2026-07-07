@@ -215,6 +215,7 @@ a{color:inherit}
     <button data-nav="referrals" onclick="go('referrals')">Referrals</button>
     <button data-nav="team" onclick="go('team')">Team</button>
     <button data-nav="calendar" onclick="go('calendar')">Calendar</button>
+    <button data-nav="conversations" onclick="go('conversations')">Conversations</button>
   </div>
   <div class="spacer"></div>
   <div class="toggle" onclick="toggleMode()"><span id="modeicon">☾</span><span id="modelabel">Dark</span></div>
@@ -344,6 +345,18 @@ a{color:inherit}
   <div id="task-list"></div>
 </div>
 
+<!-- CONVERSATIONS -->
+<div class="page" id="page-conversations">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div><div class="eyebrow">Key conversations</div><div class="sec-title serif">Conversations</div></div>
+    <button class="btn btn-primary" onclick="openConversationForm()">+ Add conversation</button>
+  </div>
+  <div class="demo-flag">An archive of important meetings with institutions, funders, and partners — date, participants, a summary, and the action items each conversation produced. Action items also appear in the task list, including for people who never log in.</div>
+  <div class="metrics" id="conv-metrics"></div>
+  <div class="filters"><input class="grow" id="cv-search" placeholder="Search conversations, people, summaries" oninput="renderConversations()"></div>
+  <div id="conv-list"></div>
+</div>
+
 <!-- CALENDAR -->
 <div class="page" id="page-calendar">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
@@ -384,7 +397,7 @@ const GOAL=20000000, VET_COST=57500;
 let roster=[],contacts=[],organizations=[],org_notes=[],referrals=[];
 let donors=[],donor_notes=[],obligations=[],vet_slots=[],vet_contribs=[];
 let contracts=[],contract_notes=[],contract_documents=[],contract_contacts=[],tasks=[];
-let cal_events=[];
+let cal_events=[],conversations=[];
 const nid=p=>crypto.randomUUID();
 const fmt=n=>'$'+Math.round(n).toLocaleString();
 const fmtK=n=>n>=1000000?'$'+(n/1000000).toFixed(n%1000000?1:0)+'M':n>=1000?'$'+Math.round(n/1000)+'K':'$'+Math.round(n);
@@ -438,6 +451,7 @@ function renderHome(){
     {ic:'▤',t:'Government & research contracts',p:'Opportunities and awards being pursued.',stat:contracts.filter(c=>!['awarded','lost'].includes(c.stage)).length,statl:'Live pursuits',go:'contracts'},
     {ic:'☑',t:'Team & tasks',p:'The team, plus assigned and gated tasks.',stat:openTasks,statl:'Open tasks',go:'team'},
     {ic:'◷',t:'Calendar',p:'Events, deadlines, and fundraisers coming up.',stat:cal_events.length,statl:'Calendar items',go:'calendar'},
+    {ic:'❝',t:'Conversations',p:'Archive of key meetings, summaries, and their action items.',stat:conversations.length,statl:'Saved conversations',go:'conversations'},
     {ic:'❖',t:'Study phases & milestones',p:'Six phases across two years.',soon:true}
   ];
   document.getElementById('home-cards').innerHTML=cards.map(c=>`
@@ -874,14 +888,16 @@ function taskFullRow(t){
   const done=t.status==='done';const gated=!done&&taskGated(t);
   const blockers=(t.blocked_by||[]).map(bid=>tasks.find(x=>x.id===bid)).filter(b=>b&&b.status!=='done');
   const cname=t.contract_id?((contracts.find(c=>c.id===t.contract_id)||{}).name||''):'';
+  const who=t.assignee_id?('<span class="link" onclick="event.stopPropagation();openLead(\''+t.assignee_id+'\')">'+rosterName(t.assignee_id)+'</span>'):((t.assignee_name||'Unassigned')+' <span class="rolechip">external</span>');
   let meta;
-  if(done)meta='Completed by '+rosterName(t.completed_by)+(t.completed_at?' · '+fmtDT(t.completed_at):'');
-  else meta='Assigned to <span class="link" onclick="event.stopPropagation();openLead(\''+t.assignee_id+'\')">'+rosterName(t.assignee_id)+'</span>'+(t.due_at?' · due '+fmtDT(t.due_at)+(isOverdue(t)?' (overdue)':''):'');
-  const pill=done?'<span class="badge b-ok">Done</span>':gated?'<span class="badge b-pend">Gated</span>':t.status==='in_progress'?'<span class="badge b-stage">In progress</span>':'';
+  if(done)meta='Completed by '+(t.completed_by?rosterName(t.completed_by):'—')+(t.completed_at?' · '+fmtDT(t.completed_at):'');
+  else meta='Assigned to '+who+(t.due_at?' · due '+fmtDT(t.due_at)+(isOverdue(t)?' (overdue)':''):'');
+  const pill=done?'<span class="badge b-ok">Done</span>':gated?'<span class="badge b-pend">Gated</span>':t.status==='in_progress'?'<span class="badge b-stage">In progress</span>':(t.status==='watch'?'<span class="badge b-stage">Watch</span>':'');
+  const convChip=t.conversation_id?` <span class="rolechip link" onclick="event.stopPropagation();openConversation('${t.conversation_id}')">conversation</span>`:'';
   return `<div class="taskrow ${done?'done':''}">
     <div class="tcheck ${gated?'locked':''}" onclick="${gated&&!done?`gatedAlert('${t.id}')`:`toggleFullTask('${t.id}')`}">${done?'✓':''}</div>
     <div style="flex:1;min-width:0">
-      <div class="ttext" onclick="openTaskForm('${t.id}')" style="cursor:pointer">${t.title} ${t.priority==='urgent'?'<span class="badge b-risk">urgent</span>':''} ${pill} ${cname?'<span class="rolechip">'+cname+'</span>':''}</div>
+      <div class="ttext" onclick="openTaskForm('${t.id}')" style="cursor:pointer">${t.title} ${t.priority==='urgent'?'<span class="badge b-risk">urgent</span>':''} ${pill} ${cname?'<span class="rolechip">'+cname+'</span>':''}${convChip}</div>
       <div class="meta" style="text-align:left">${meta}${gated&&blockers.length?' · waiting on '+blockers.map(b=>b.title).join(', '):''}</div>
     </div>
   </div>`;
@@ -895,21 +911,26 @@ function toggleFullTask(tid){
   renderTasks();renderHome();renderContracts();
 }
 function filterAssignee(id){document.getElementById('tf-assignee').value=id;renderTasks();}
+function externalNames(){return [...new Set(tasks.filter(t=>!t.assignee_id&&t.assignee_name).map(t=>t.assignee_name))].sort();}
 function renderTasks(){
   const fa=document.getElementById('tf-assignee');
-  if(fa&&fa.options.length<=1)fa.innerHTML='<option value="">Whole team</option>'+roster.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  const exts=externalNames();
+  if(fa){const cur=fa.value;fa.innerHTML='<option value="">Whole team</option>'+roster.map(r=>`<option value="${r.id}">${r.name}</option>`).join('')+exts.map(n=>`<option value="ext:${n}">${n} (external)</option>`).join('');fa.value=cur;}
   const aSel=fa?fa.value:'';const sSel=document.getElementById('tf-status')?document.getElementById('tf-status').value:'';
-  const open=tasks.filter(t=>t.status!=='done').length;
+  const active=t=>t.status!=='done'&&t.status!=='dropped';
+  const open=tasks.filter(active).length;
   const overdue=tasks.filter(isOverdue).length;
-  const gated=tasks.filter(t=>t.status!=='done'&&taskGated(t)).length;
+  const gated=tasks.filter(t=>active(t)&&taskGated(t)).length;
   const done=tasks.filter(t=>t.status==='done').length;
   document.getElementById('task-metrics').innerHTML=[['Open',open],['Overdue',overdue],['Gated',gated],['Completed',done]].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
-  document.getElementById('team-monitor').innerHTML='<div class="mlabel" style="margin-top:4px">Team monitor</div><div class="cardgrid" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))">'+roster.map(r=>{
-    const my=tasks.filter(t=>t.assignee_id===r.id);const mo=my.filter(t=>t.status!=='done').length;const mov=my.filter(isOverdue).length;const mg=my.filter(t=>t.status!=='done'&&taskGated(t)).length;
-    return `<div class="wcard" style="cursor:pointer" onclick="filterAssignee('${r.id}')"><h3 class="serif" style="font-size:15px">${r.name}${r.is_owner?' <span class="rolechip">owner</span>':''}</h3><p style="min-height:auto;font-size:12px">${r.role||''}</p><div class="stat">${mo}</div><div class="statl">Open${mov?' · '+mov+' overdue':''}${mg?' · '+mg+' gated':''}</div></div>`;
+  const mon=roster.map(r=>({key:r.id,name:r.name,role:r.role||'',owner:r.is_owner,ext:false,t:tasks.filter(t=>t.assignee_id===r.id)}))
+    .concat(exts.map(n=>({key:'ext:'+n,name:n,role:'External — committed in a conversation',owner:false,ext:true,t:tasks.filter(t=>!t.assignee_id&&t.assignee_name===n)})));
+  document.getElementById('team-monitor').innerHTML='<div class="mlabel" style="margin-top:4px">Team monitor</div><div class="cardgrid" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))">'+mon.filter(m=>m.t.length).map(m=>{
+    const mo=m.t.filter(active).length;const mov=m.t.filter(isOverdue).length;const mg=m.t.filter(t=>active(t)&&taskGated(t)).length;
+    return `<div class="wcard" style="cursor:pointer" onclick="filterAssignee('${m.key}')"><h3 class="serif" style="font-size:15px">${m.name}${m.owner?' <span class="rolechip">owner</span>':''}${m.ext?' <span class="rolechip">external</span>':''}</h3><p style="min-height:auto;font-size:12px">${m.role}</p><div class="stat">${mo}</div><div class="statl">Open${mov?' · '+mov+' overdue':''}${mg?' · '+mg+' gated':''}</div></div>`;
   }).join('')+'</div>';
   let list=tasks.filter(t=>{
-    if(aSel&&t.assignee_id!==aSel)return false;
+    if(aSel){ if(aSel.slice(0,4)==='ext:'){ if(t.assignee_id||t.assignee_name!==aSel.slice(4))return false; } else if(t.assignee_id!==aSel)return false; }
     if(sSel==='gated'){if(t.status==='done'||!taskGated(t))return false;}
     else if(sSel&&t.status!==sSel)return false;
     return true;
@@ -917,11 +938,14 @@ function renderTasks(){
   const host=document.getElementById('task-list');
   if(!list.length){host.innerHTML='<div class="empty">No tasks match.</div>';return;}
   let html='<div class="mlabel">Tasks by owner</div>';
-  roster.forEach(r=>{
-    const g=list.filter(t=>t.assignee_id===r.id);if(!g.length)return;
-    g.sort((a,b)=>((a.status==='done')-(b.status==='done'))||((a.due_at||'zzz')>(b.due_at||'zzz')?1:-1));
-    html+=`<div class="tiergroup"><div class="tierhead"><span class="tn" style="font-size:15px"><span class="link" onclick="openLead('${r.id}')">${r.name}</span></span><span class="tr">${r.role||''}</span><span class="ta">${g.filter(t=>t.status!=='done').length} open</span></div>`;
-    g.forEach(t=>html+=taskFullRow(t));
+  const groups=roster.map(r=>({name:r.name,role:r.role||'',key:r.id,ext:false,g:list.filter(t=>t.assignee_id===r.id)}))
+    .concat(exts.map(n=>({name:n,role:'External',key:'ext:'+n,ext:true,g:list.filter(t=>!t.assignee_id&&t.assignee_name===n)})));
+  groups.forEach(gp=>{
+    if(!gp.g.length)return;
+    gp.g.sort((a,b)=>((a.status==='done')-(b.status==='done'))||((a.due_at||'zzz')>(b.due_at||'zzz')?1:-1));
+    const nameHtml=gp.ext?gp.name+' <span class="rolechip">external</span>':`<span class="link" onclick="openLead('${gp.key}')">${gp.name}</span>`;
+    html+=`<div class="tiergroup"><div class="tierhead"><span class="tn" style="font-size:15px">${nameHtml}</span><span class="tr">${gp.role}</span><span class="ta">${gp.g.filter(active).length} open</span></div>`;
+    gp.g.forEach(t=>html+=taskFullRow(t));
     html+='</div>';
   });
   host.innerHTML=html;
@@ -937,6 +961,7 @@ function openTaskForm(id){
       <div class="field"><label>Assign to</label><select id="tk-assignee">${roster.map(r=>`<option value="${r.id}" ${t.assignee_id===r.id?'selected':''}>${r.name}</option>`).join('')}</select></div>
       <div class="field"><label>Priority</label><select id="tk-priority"><option value="normal" ${t.priority!=='urgent'?'selected':''}>Normal</option><option value="urgent" ${t.priority==='urgent'?'selected':''}>Urgent</option></select></div>
     </div>
+    <div class="field"><label>Or external assignee (someone not on the team)</label><input id="tk-extname" value="${t.assignee_name||''}" placeholder="Name of an external person — leave blank to use the team member above"></div>
     <div class="two">
       <div class="field"><label>Due date &amp; time</label><input id="tk-due" type="datetime-local" value="${dueLocal}"></div>
       <div class="field"><label>Status</label><select id="tk-status"><option value="open" ${(!t.status||t.status==='open')?'selected':''}>Open</option><option value="in_progress" ${t.status==='in_progress'?'selected':''}>In progress</option><option value="done" ${t.status==='done'?'selected':''}>Done</option></select></div>
@@ -950,7 +975,9 @@ function saveTask(id){
   const g=x=>document.getElementById(x).value;
   const title=g('tk-title').trim();if(!title){alert('Task required');return;}
   const blockers=Array.from(document.getElementById('tk-blockers').selectedOptions).map(o=>o.value);
-  const data={title,assignee_id:g('tk-assignee'),priority:g('tk-priority'),due_at:g('tk-due')||null,status:g('tk-status'),contract_id:g('tk-contract')||null,blocked_by:blockers};
+  const ext=(document.getElementById('tk-extname').value||'').trim();
+  const data={title,priority:g('tk-priority'),due_at:g('tk-due')||null,status:g('tk-status'),contract_id:g('tk-contract')||null,blocked_by:blockers};
+  if(ext){data.assignee_name=ext;data.assignee_id=null;}else{data.assignee_id=g('tk-assignee');data.assignee_name=null;}
   if(id){Object.assign(tasks.find(x=>x.id===id),data);P.update('tasks',id,data);}
   else{const rec={id:nid('t'),...data};tasks.push(rec);P.insert('tasks',rec);}
   closeModal();renderTasks();renderHome();renderContracts();
@@ -1107,6 +1134,63 @@ function saveReferral(id){
   else{const rec={id:nid('ref'),created_at:new Date().toISOString().slice(0,10),...data};referrals.push(rec);P.insert('referrals',rec);closeModal();}
   renderReferrals();renderHome();
 }
+function renderConversations(){
+  const host=document.getElementById('conv-list');if(!host)return;
+  const sb=document.getElementById('cv-search');const q=(sb?sb.value:'').toLowerCase();
+  let list=conversations.filter(c=>!q||(c.title||'').toLowerCase().includes(q)||(c.org||'').toLowerCase().includes(q)||(c.participants||'').toLowerCase().includes(q)||(c.summary||'').toLowerCase().includes(q));
+  list=list.sort((a,b)=>String(b.meeting_date||'').localeCompare(String(a.meeting_date||'')));
+  const mEl=document.getElementById('conv-metrics');
+  if(mEl)mEl.innerHTML=[['Conversations',conversations.length],['Action items',tasks.filter(t=>t.conversation_id).length],['Open items',tasks.filter(t=>t.conversation_id&&t.status!=='done'&&t.status!=='dropped').length]].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
+  if(!list.length){host.innerHTML='<div class="empty">No conversations yet.</div>';return;}
+  host.innerHTML=list.map(c=>{
+    const items=tasks.filter(t=>t.conversation_id===c.id);const open=items.filter(t=>t.status!=='done'&&t.status!=='dropped').length;
+    return `<div class="row" onclick="openConversation('${c.id}')" style="cursor:pointer">
+      <div class="avatar">${c.meeting_date?new Date(c.meeting_date+'T00:00').getDate():'—'}</div>
+      <div class="main"><div class="rn">${c.title}</div><div class="rs">${c.meeting_date?fmtDate(c.meeting_date):''}${c.participants?' · '+c.participants:''}</div></div>
+      <div class="meta">${items.length} items · ${open} open</div></div>`;
+  }).join('');
+}
+function openConversation(id){
+  const c=conversations.find(x=>x.id===id);if(!c)return;
+  const items=tasks.filter(t=>t.conversation_id===id).sort((a,b)=>((a.status==='done')-(b.status==='done')));
+  openModal(`<div class="mhead"><div class="avatar">❝</div>
+    <div class="mt"><h3>${c.title}</h3><div class="msub">${c.meeting_date?fmtDate(c.meeting_date):''}${c.org?' · '+c.org:''}</div></div>
+    <button class="btn btn-outline btn-sm" onclick="openConversationForm('${c.id}')">Edit</button>
+    <button class="close" onclick="closeModal()">×</button></div>
+    <div class="mbody">
+      ${c.participants?`<div class="kv"><span class="k">Participants</span><span class="v">${c.participants}</span></div>`:''}
+      ${c.source?`<div class="kv"><span class="k">Source</span><span class="v">${c.source}</span></div>`:''}
+      <div class="mlabel">Summary</div>
+      <div class="note" style="white-space:pre-wrap;line-height:1.6">${c.summary||'No summary yet.'}</div>
+      <div class="mlabel">Action items (${items.length})</div>
+      ${items.length?items.map(t=>{
+        const done=t.status==='done';const who=t.assignee_id?rosterName(t.assignee_id):(t.assignee_name||'Unassigned');const ext=!t.assignee_id&&t.assignee_name;
+        return `<div class="obl ${done?'done':''}"><div class="ob-check" onclick="toggleConvTask('${t.id}','${c.id}')">${done?'✓':''}</div>
+          <div class="ob-text" style="flex:1">${t.title}<div class="meta" style="text-align:left">${who}${ext?' <span class="rolechip">external</span>':''}${t.due_at?' · due '+fmtDT(t.due_at):(t.date_text?' · '+t.date_text:'')}</div></div></div>`;
+      }).join(''):'<div class="empty" style="padding:8px">No action items linked.</div>'}
+    </div>`);
+}
+function toggleConvTask(tid,cid){toggleFullTask(tid);openConversation(cid);}
+function openConversationForm(id){
+  const c=id?conversations.find(x=>x.id===id):{};
+  openModal(`<div class="mhead"><div class="mt"><h3>${id?'Edit conversation':'Add conversation'}</h3><div class="msub">Key conversation archive</div></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="mbody">
+    <div class="field"><label>Title</label><input id="cv-title" value="${c.title||''}"></div>
+    <div class="two"><div class="field"><label>Organization / group</label><input id="cv-org" value="${c.org||''}"></div><div class="field"><label>Date</label><input id="cv-date" type="date" value="${c.meeting_date||''}"></div></div>
+    <div class="field"><label>Participants</label><input id="cv-part" value="${c.participants||''}"></div>
+    <div class="field"><label>Source</label><input id="cv-src" value="${c.source||''}" placeholder="transcript, call, email"></div>
+    <div class="field"><label>Summary</label><textarea id="cv-sum" style="min-height:150px">${c.summary||''}</textarea></div>
+    <div class="mfoot"><button class="btn btn-outline btn-sm" onclick="${id?`openConversation('${id}')`:'closeModal()'}">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveConversation('${id||''}')">Save conversation</button></div>
+  </div>`);
+}
+function saveConversation(id){
+  const g=x=>document.getElementById(x).value;
+  const title=g('cv-title').trim();if(!title){alert('Title required');return;}
+  const data={title,org:g('cv-org'),meeting_date:g('cv-date')||null,participants:g('cv-part'),source:g('cv-src'),summary:g('cv-sum')};
+  if(id){Object.assign(conversations.find(x=>x.id===id),data);P.update('conversations',id,data);openConversation(id);}
+  else{const rec={id:nid('cv'),...data};conversations.push(rec);P.insert('conversations',rec);closeModal();}
+  renderConversations();renderHome();
+}
 function renderCalendar(){
   const host=document.getElementById('calendar-list');if(!host)return;
   const today=new Date().toISOString().slice(0,10);
@@ -1158,19 +1242,19 @@ function saveEvent(id){
   else{const rec={id:nid('ce'),...data};cal_events.push(rec);P.insert('calendar_events',rec);}
   closeModal();renderCalendar();renderHome();
 }
-window.__renderAll=function(){fillFilterOptions();renderHome();renderProspects();renderDonors();renderVets();renderContracts();renderTasks();renderReferrals();renderTeam();renderCalendar();};
+window.__renderAll=function(){fillFilterOptions();renderHome();renderProspects();renderDonors();renderVets();renderContracts();renderTasks();renderReferrals();renderTeam();renderCalendar();renderConversations();};
 </script>
 <script>
 async function hydrate(){
   const q=n=>sb.from(n).select('*');
-  const [ros,con,orgs,ornotes,refs,don,dn,obl,vs,vc,ctr,cn,cd,cc,tk,ce]=await Promise.all([
+  const [ros,con,orgs,ornotes,refs,don,dn,obl,vs,vc,ctr,cn,cd,cc,tk,ce,cv]=await Promise.all([
     q('roster'),q('contacts'),q('organizations'),q('org_notes'),q('referrals'),
     q('donors'),q('donor_notes'),q('donor_obligations'),q('veteran_slots'),q('veteran_contributions'),
-    q('contracts'),q('contract_notes'),q('contract_documents'),q('contract_contacts'),q('tasks'),q('calendar_events')
+    q('contracts'),q('contract_notes'),q('contract_documents'),q('contract_contacts'),q('tasks'),q('calendar_events'),q('conversations')
   ]);
   roster=ros.data||[];contacts=con.data||[];organizations=orgs.data||[];org_notes=ornotes.data||[];referrals=refs.data||[];
   donors=don.data||[];donor_notes=dn.data||[];obligations=obl.data||[];vet_slots=vs.data||[];vet_contribs=vc.data||[];
-  contracts=ctr.data||[];contract_notes=cn.data||[];contract_documents=cd.data||[];contract_contacts=cc.data||[];tasks=tk.data||[];cal_events=ce.data||[];
+  contracts=ctr.data||[];contract_notes=cn.data||[];contract_documents=cd.data||[];contract_contacts=cc.data||[];tasks=tk.data||[];cal_events=ce.data||[];conversations=cv.data||[];
 }
 async function boot(){
   try{ await hydrate(); }catch(e){ document.getElementById('lg-err').textContent='Could not load data. '+(e.message||''); return; }
