@@ -1107,7 +1107,7 @@ function saveReferral(id){
   else{const rec={id:nid('ref'),created_at:new Date().toISOString().slice(0,10),...data};referrals.push(rec);P.insert('referrals',rec);closeModal();}
   renderReferrals();renderHome();
 }
-window.__renderAll=function(){function renderCalendar(){
+function renderCalendar(){
   const host=document.getElementById('calendar-list');if(!host)return;
   const today=new Date().toISOString().slice(0,10);
   const items=[];
@@ -1158,7 +1158,7 @@ function saveEvent(id){
   else{const rec={id:nid('ce'),...data};cal_events.push(rec);P.insert('calendar_events',rec);}
   closeModal();renderCalendar();renderHome();
 }
-fillFilterOptions();renderHome();renderProspects();renderDonors();renderVets();renderContracts();renderTasks();renderReferrals();renderTeam();renderCalendar();};
+window.__renderAll=function(){fillFilterOptions();renderHome();renderProspects();renderDonors();renderVets();renderContracts();renderTasks();renderReferrals();renderTeam();renderCalendar();};
 </script>
 <script>
 async function hydrate(){
