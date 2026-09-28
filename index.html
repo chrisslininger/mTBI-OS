@@ -182,6 +182,44 @@ a{color:inherit}
 .meta{font-size:11px;color:var(--muted);text-align:right;line-height:1.35;flex-shrink:0}
 .tcheck.locked{border-color:var(--muted)!important;cursor:not-allowed;background:transparent!important}
 .taskrow .ttext .badge,.taskrow .ttext .rolechip{margin-left:4px}
+/* phases in hero */
+.phasegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:20px;padding-top:18px;border-top:0.5px solid var(--border)}
+.phase{background:var(--raised);border-radius:12px;padding:12px 14px}
+.phase .pn{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--eyebrow);display:flex;justify-content:space-between;gap:8px}
+.phase .pt{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:16px;margin:2px 0 6px;line-height:1.2}
+.phase .pv{font-size:12px;color:var(--text2);margin-top:5px}
+.b-phase{background:var(--raised);color:var(--gold-deep);border:0.5px solid var(--border)}
+/* participants */
+.livechip{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ok);background:var(--ok-bg);padding:4px 10px;border-radius:20px}
+.livechip.off{color:var(--muted);background:var(--raised)}
+.livedot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+.livechip.off .livedot{animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+.b-sof{background:#1F2A44;color:#DCC084}
+[data-mode="dark"] .b-sof{background:#2A3550;color:#E4CB8E}
+.b-new{background:var(--ok-bg);color:var(--ok)}
+.b-closed{background:var(--raised);color:var(--muted)}
+.summary{font-size:14px;line-height:1.65;color:var(--text)}
+.summary p{margin:0 0 10px}
+.summary .lead{font-size:16px;font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;line-height:1.4}
+.summary b{font-weight:500;color:var(--gold-deep)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+.chip{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--raised);color:var(--text2);border:0.5px solid var(--border)}
+.chip.on{background:var(--pend-bg);color:var(--pend);border-color:transparent}
+.flags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.flag{font-size:11.5px;padding:3px 10px;border-radius:20px;background:var(--risk-bg);color:var(--risk)}
+.flag.ok{background:var(--ok-bg);color:var(--ok)}
+.flag.neutral{background:var(--raised);color:var(--text2)}
+.quote{border-left:2px solid var(--gold);padding:6px 12px;margin:6px 0 10px;color:var(--text2);font-size:13px;white-space:pre-wrap;line-height:1.55}
+.statusbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 22px;background:var(--raised);border-bottom:0.5px solid var(--border);font-size:13px}
+.statusbar select{font-family:inherit;font-size:13px;padding:7px 10px;border-radius:9px;border:0.5px solid var(--border);background:var(--card);color:var(--text)}
+.statusbar .who{color:var(--muted);font-size:12px;margin-left:auto}
+.modal.wide{max-width:720px}
+.kv .v.left{text-align:left;font-weight:400}
+.kv.stack{flex-direction:column;gap:4px}
+.kv.stack .v{text-align:left;font-weight:400}
+.contactline{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.contactline a{font-size:12.5px;text-decoration:none}
 @media(max-width:640px){
   .nav{display:none}
   .hero .htitle{font-size:26px}
@@ -209,13 +247,12 @@ a{color:inherit}
   </div>
   <div class="nav">
     <button data-nav="home" class="active" onclick="go('home')">Home</button>
-    <button data-nav="prospects" onclick="go('prospects')">Prospects</button>
+    <button data-nav="participants" onclick="go('participants')">Participants</button>
     <button data-nav="donors" onclick="go('donors')">Donors</button>
     <button data-nav="contracts" onclick="go('contracts')">Contracts</button>
-    <button data-nav="referrals" onclick="go('referrals')">Referrals</button>
+    <button data-nav="partners" onclick="go('partners')">Partners</button>
     <button data-nav="team" onclick="go('team')">Team</button>
     <button data-nav="calendar" onclick="go('calendar')">Calendar</button>
-    <button data-nav="conversations" onclick="go('conversations')">Conversations</button>
   </div>
   <div class="spacer"></div>
   <div class="toggle" onclick="toggleMode()"><span id="modeicon">☾</span><span id="modelabel">Dark</span></div>
@@ -229,15 +266,16 @@ a{color:inherit}
   <div class="hero">
     <div class="eyebrow">Every dollar moves this forward</div>
     <div class="htitle serif">Funding progress</div>
-    <div class="hsub">Raising the $20,000,000 needed to execute the study at the level of rigor that makes its findings impossible for medicine and policy to ignore.</div>
+    <div class="hsub">Raising the <span id="hs-goal-inline">$23,540,662</span> needed to execute all four research phases at the level of rigor that makes the findings impossible for medicine and policy to ignore. Donors are locked to a phase — Phase 1 first, then Phase 2 — so each gift is honored for the work it funds.</div>
     <div class="bigtrack"><div class="bigfill" id="hero-fill" style="width:0%"></div></div>
     <div class="herostats">
       <div class="s"><div class="n" id="hs-raised">$0</div><div class="l">Raised to date</div></div>
-      <div class="s"><div class="n">$20,000,000</div><div class="l">Goal</div></div>
+      <div class="s"><div class="n" id="hs-goal">$23,540,662</div><div class="l">Goal · 4 phases</div></div>
       <div class="s"><div class="n" id="hs-pct">0%</div><div class="l">Of goal</div></div>
       <div class="s"><div class="n" id="hs-committed">0</div><div class="l">Committed funders</div></div>
       <div class="s"><div class="n" id="hs-vets">0</div><div class="l">Veterans sponsored</div></div>
     </div>
+    <div class="phasegrid" id="hero-phases"></div>
   </div>
 
   <div class="eyebrow">A mission that takes a team</div>
@@ -245,43 +283,28 @@ a{color:inherit}
   <div class="cardgrid" id="home-cards"></div>
 </div>
 
-<!-- PROSPECTS -->
-<div class="page" id="page-prospects">
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
-    <div>
-      <div class="eyebrow">Pipeline</div>
-      <div class="sec-title serif">Prospects</div>
-    </div>
-    <button class="btn btn-primary" onclick="openDonorForm()">+ Add prospect</button>
-  </div>
-  <div class="demo-flag">Prospective funders you are actively pursuing. When a prospect commits or gives, they move to Donors automatically.</div>
-  <div class="metrics" id="prospect-metrics"></div>
-  <div class="filters">
-    <input class="grow" id="pf-search" placeholder="Search prospects" oninput="renderProspects()">
-    <select id="pf-type" onchange="renderProspects()"><option value="">All types</option><option value="organization">Organizations</option><option value="individual">Individuals</option></select>
-    <select id="pf-tier" onchange="renderProspects()"><option value="">All target tiers</option></select>
-    <select id="pf-stage" onchange="renderProspects()"><option value="">All stages</option></select>
-  </div>
-  <div id="prospect-list"></div>
-</div>
-
 <!-- DONORS -->
 <div class="page" id="page-donors">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
     <div>
-      <div class="eyebrow">Confirmed funders</div>
+      <div class="eyebrow">Funding pipeline</div>
       <div class="sec-title serif">Donors</div>
     </div>
     <button class="btn btn-primary" onclick="openDonorForm()">+ Add donor</button>
   </div>
-  <div class="demo-flag">Those who have committed or given. Organized by giving tier.</div>
+  <div class="demo-flag"><span>Everyone in the funding pipeline. <b>Funded &amp; committed</b> donors are listed first by giving tier; <b>prospects</b> you are still pursuing follow by stage. Each donor is locked to a research phase, and their received gifts roll straight into that phase's progress on the website.</span></div>
   <div class="metrics" id="donor-metrics"></div>
   <div class="filters">
-    <input class="grow" id="f-search" placeholder="Search donors" oninput="renderDonors()">
+    <input class="grow" id="f-search" placeholder="Search donors and prospects" oninput="renderDonors()">
     <select id="f-type" onchange="renderDonors()"><option value="">All types</option><option value="organization">Organizations</option><option value="individual">Individuals</option></select>
     <select id="f-tier" onchange="renderDonors()"><option value="">All tiers</option></select>
+    <select id="f-stage" onchange="renderDonors()"><option value="">All stages</option></select>
+    <select id="f-phase" onchange="renderDonors()"><option value="">All phases</option></select>
   </div>
+  <div class="mlabel" style="margin-top:4px">Funded &amp; committed</div>
   <div id="donor-list"></div>
+  <div class="mlabel" style="margin-top:26px">Prospects — still in conversation</div>
+  <div id="prospect-list"></div>
 
   <div style="margin-top:34px">
     <div class="eyebrow">Sponsor a veteran</div>
@@ -308,19 +331,51 @@ a{color:inherit}
   <div id="contract-list"></div>
 </div>
 
-<!-- REFERRALS -->
-<div class="page" id="page-referrals">
+<!-- PARTICIPANTS (Phase 1 applications from mtbiresearch.com/apply) -->
+<div class="page" id="page-participants">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
-    <div><div class="eyebrow">Enrollment opens in Phase 2</div><div class="sec-title serif">Participant referrals</div></div>
+    <div><div class="eyebrow">Phase 1 pilot · now onboarding</div><div class="sec-title serif">Participants</div></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="livechip" id="app-live" title="Applications appear here the moment they are submitted"><span class="livedot"></span>Live</span>
+      <button class="btn btn-outline btn-sm" onclick="reloadApplications(true)">Refresh</button>
+    </div>
+  </div>
+  <div class="demo-flag"><span>Everyone who has applied through <b>mtbiresearch.com/apply</b>. Each application syncs here automatically the moment it is submitted. Open a name to read their summary, move them through screening, and keep notes.</span></div>
+  <div class="metrics" id="app-metrics"></div>
+  <div class="filters">
+    <input class="grow" id="af-search" placeholder="Search name, email, city, branch, symptoms" oninput="renderParticipants()">
+    <select id="af-status" onchange="renderParticipants()"><option value="">All statuses</option><option value="active">Active (not closed)</option></select>
+    <select id="af-sof" onchange="renderParticipants()"><option value="">All applicants</option><option value="sof">Special Operations only</option><option value="nonsof">Non-SOF only</option></select>
+    <select id="af-sort" onchange="renderParticipants()"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="name">Name A–Z</option><option value="events">Most mTBI events</option></select>
+  </div>
+  <div id="app-list"></div>
+
+  <div style="margin-top:36px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+    <div><div class="eyebrow">Referred, not yet applied</div><div class="sec-title serif" style="font-size:24px">Referred participants</div></div>
     <button class="btn btn-primary" onclick="openReferralForm()">+ Add referral</button>
   </div>
-  <div class="demo-flag">Veterans, operators, and NFL athletes referred to the study. Those submitted now are first contacted when enrollment opens.</div>
+  <div class="demo-flag"><span>Veterans, operators, and athletes someone has referred to the study. Once they apply at mtbiresearch.com/apply they appear in the list above.</span></div>
   <div class="metrics" id="referral-metrics"></div>
   <div class="filters">
     <input class="grow" id="rf-search" placeholder="Search referrals" oninput="renderReferrals()">
     <select id="rf-status" onchange="renderReferrals()"><option value="">All statuses</option><option value="new">New</option><option value="screening">Screening</option><option value="eligible">Eligible</option><option value="enrolled">Enrolled</option><option value="not_eligible">Not eligible</option><option value="declined">Declined</option></select>
   </div>
   <div id="referral-list"></div>
+</div>
+
+<!-- PARTNERS -->
+<div class="page" id="page-partners">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div><div class="eyebrow">Institutions &amp; allies</div><div class="sec-title serif">Partners</div></div>
+    <button class="btn btn-primary" onclick="openOrgForm()">+ Add partner</button>
+  </div>
+  <div class="demo-flag"><span>The organizations standing behind the study — IRB and academic partners, clinics, institutes, government-relations firms, and allied nonprofits. Open a partner for its people, funding record, and notes.</span></div>
+  <div class="metrics" id="org-metrics"></div>
+  <div class="filters">
+    <input class="grow" id="of-search" placeholder="Search partners" oninput="renderOrgs()">
+    <select id="of-status" onchange="renderOrgs()"><option value="">All statuses</option><option value="active">Active</option><option value="prospective">Prospective</option><option value="inactive">Inactive</option></select>
+  </div>
+  <div class="cardgrid" id="org-list"></div>
 </div>
 
 <!-- TEAM & TASKS -->
@@ -392,13 +447,18 @@ const OBLIGATIONS={
   sponsor_veteran:['List as veteran sponsor on website'],
   community:['Recognize in study acknowledgments','Send published findings on release']
 };
-const GOAL=20000000, VET_COST=57500;
+const VET_COST=57500;
+const goalTotal=()=>phases.length?phases.reduce((a,p)=>a+(+p.goal_amount||0),0):23540662;
+const raisedTotal=()=>phase_contribs.reduce((a,c)=>a+(+c.amount||0),0);
+const phaseLabel=n=>{const p=phases.find(x=>+x.phase_number===+n);return p?`Phase ${p.phase_number}`:(n?`Phase ${n}`:'—');};
+const currentPhase=()=>{const p=phases.find(x=>x.is_current);return p?+p.phase_number:1;};
 
 let roster=[],contacts=[],organizations=[],org_notes=[],referrals=[];
 let donors=[],donor_notes=[],obligations=[],vet_slots=[],vet_contribs=[];
 let contracts=[],contract_notes=[],contract_documents=[],contract_contacts=[],tasks=[];
-let cal_events=[],conversations=[];
+let cal_events=[],conversations=[],applications=[],app_notes=[],phases=[],phase_contribs=[];
 const nid=p=>crypto.randomUUID();
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>'$'+Math.round(n).toLocaleString();
 const fmtK=n=>n>=1000000?'$'+(n/1000000).toFixed(n%1000000?1:0)+'M':n>=1000?'$'+Math.round(n/1000)+'K':'$'+Math.round(n);
 const fmtDT=s=>{if(!s)return'';const d=new Date(s);if(isNaN(d))return s;return d.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});};
@@ -425,7 +485,7 @@ function toggleMode(){
 
 function totals(){
   const committed=donors.filter(d=>['committed','stewardship'].includes(d.stage));
-  const received=donors.reduce((s,d)=>s+(+d.amount_received||0),0);
+  const received=raisedTotal();
   const pledged=activeDonors().reduce((s,d)=>s+Math.max(+d.amount_pledged||0,+d.amount_received||0),0);
   const vetsFunded=vet_slots.filter(v=>slotRaised(v.id)>=v.goal_amount).length;
   const pipeline=activeDonors().filter(d=>!['committed','stewardship'].includes(d.stage)).length;
@@ -435,19 +495,32 @@ const slotRaised=sid=>vet_contribs.filter(c=>c.slot_id===sid).reduce((s,c)=>s+(+
 
 function renderHome(){
   const t=totals();
+  const GOAL=goalTotal();
   document.getElementById('hero-fill').style.width=Math.min(100,t.received/GOAL*100)+'%';
   document.getElementById('hs-raised').textContent=fmt(t.received);
+  document.getElementById('hs-goal').textContent=fmt(GOAL);
+  document.getElementById('hs-goal-inline').textContent=fmt(GOAL);
   document.getElementById('hs-pct').textContent=(t.received/GOAL*100).toFixed(1)+'%';
+  document.getElementById('hero-phases').innerHTML=phases.slice().sort((a,b)=>a.sort-b.sort).map(p=>{
+    const raised=phase_contribs.filter(c=>+c.phase_number===+p.phase_number).reduce((a,c)=>a+(+c.amount||0),0);
+    const goal=+p.goal_amount||0;const pct=goal?Math.min(100,raised/goal*100):0;
+    const n=donors.filter(d=>+d.phase_number===+p.phase_number&&isFunded(d)).length;
+    return `<div class="phase"><div class="pn"><span>Phase ${p.phase_number}</span>${p.is_current?'<span class="badge b-ok" style="font-size:10px">Funding now</span>':''}</div>
+      <div class="pt">${esc(p.name)}</div>
+      <div class="minitrack"><div class="minifill" style="width:${pct}%"></div></div>
+      <div class="pv">${fmt(raised)} of ${fmtK(goal)} · ${pct.toFixed(pct&&pct<1?1:0)}%${n?' · '+n+' donor'+(n===1?'':'s'):''}</div></div>`;
+  }).join('');
   document.getElementById('hs-committed').textContent=t.committed;
   document.getElementById('hs-vets').textContent=t.vetsFunded;
   const openTasks=tasks.filter(x=>x.status!=='done').length;
-  const overdueObl=obligations.filter(o=>o.status!=='done'&&o.due_date&&o.due_date<'2026-07-06').length;
+  const overdueObl=obligations.filter(o=>o.status!=='done'&&o.due_date&&o.due_date<new Date().toISOString().slice(0,10)).length;
   const cards=[
-    {ic:'◈',t:'Prospects',p:'Funders you are actively pursuing.',stat:prospectDonors().filter(d=>d.stage!=='passed').length,statl:'Active prospects',go:'prospects'},
+    {ic:'◈',t:'Prospects',p:'Funders you are actively pursuing.',stat:prospectDonors().filter(d=>d.stage!=='passed').length,statl:'Active prospects',go:'donors'},
     {ic:'◆',t:'Donors',p:'Those who have committed or funded.',stat:fundedDonors().length,statl:'Committed funders',go:'donors'},
     {ic:'⬡',t:'Veteran sponsorship',p:'Pooled $5K gifts toward full sponsorships.',stat:t.vetsFunded+' / '+vet_slots.length,statl:'Veterans funded',go:'donors'},
     {ic:'✦',t:'Recognition & obligations',p:'What is promised to each funder, and what is due.',stat:overdueObl,statl:'Due or overdue',go:'donors'},
-    {ic:'⚑',t:'Participant referrals',p:'Veterans, operators, and athletes referred.',stat:referrals.length,statl:'Referrals',go:'referrals'},
+    {ic:'⚕',t:'Phase 1 participants',p:'Applications from mtbiresearch.com — synced live.',stat:applications.filter(a=>a.status==='new').length+' new / '+applications.length,statl:'Applications',go:'participants'},
+    {ic:'⚑',t:'Participant referrals',p:'Veterans, operators, and athletes referred.',stat:referrals.length,statl:'Referrals',go:'participants'},
     {ic:'▤',t:'Government & research contracts',p:'Opportunities and awards being pursued.',stat:contracts.filter(c=>!['awarded','lost'].includes(c.stage)).length,statl:'Live pursuits',go:'contracts'},
     {ic:'☑',t:'Team & tasks',p:'The team, plus assigned and gated tasks.',stat:openTasks,statl:'Open tasks',go:'team'},
     {ic:'◷',t:'Calendar',p:'Events, deadlines, and fundraisers coming up.',stat:cal_events.length,statl:'Calendar items',go:'calendar'},
@@ -466,8 +539,8 @@ function renderHome(){
 function fillFilterOptions(){
   const tierOpts=TIER_ORDER.map(k=>`<option value="${k}">${TIERS[k].name}</option>`).join('');
   document.getElementById('f-tier').innerHTML='<option value="">All tiers</option>'+tierOpts;
-  document.getElementById('pf-tier').innerHTML='<option value="">All target tiers</option>'+tierOpts;
-  document.getElementById('pf-stage').innerHTML='<option value="">All stages</option>'+Object.keys(STAGES).map(k=>`<option value="${k}">${STAGES[k]}</option>`).join('');
+  document.getElementById('f-stage').innerHTML='<option value="">All stages</option>'+Object.keys(STAGES).map(k=>`<option value="${k}">${STAGES[k]}</option>`).join('');
+  document.getElementById('f-phase').innerHTML='<option value="">All phases</option>'+phases.slice().sort((a,b)=>a.sort-b.sort).map(p=>`<option value="${p.phase_number}">Phase ${p.phase_number} · ${esc(p.name)}</option>`).join('');
   document.getElementById('cf-stage').innerHTML='<option value="">All stages</option>'+Object.keys(CSTAGES).map(k=>`<option value="${k}">${CSTAGES[k]}</option>`).join('');
 }
 
@@ -503,7 +576,7 @@ function donorRowsHTML(list,empty){
         <div class="avatar">${initials(d.name)}</div>
         <div class="main">
           <div class="rn">${d.name} ${d.type==='organization'?'<span class="badge b-org">Organization</span>':'<span class="badge b-ind">Individual</span>'}</div>
-          <div class="rs">${stageBadge(d)}${isTarget?' · <span style="color:var(--muted)">target tier</span>':''} · ${rosterName(d.owner_id)}${d.source?' · '+d.source:''}</div>
+          <div class="rs">${stageBadge(d)} <span class="badge b-phase">${phaseLabel(d.phase_number||currentPhase())}</span>${isTarget?' · <span style="color:var(--muted)">target tier</span>':''} · ${rosterName(d.owner_id)}${d.source?' · '+d.source:''}</div>
         </div>
         <div class="amt"><div class="a1">${amt?fmtK(amt):'—'}</div><div class="a2">${d.amount_received?fmt(d.amount_received)+' in':'no gift yet'}</div></div>
       </div>`;
@@ -512,35 +585,27 @@ function donorRowsHTML(list,empty){
   });
   return html||`<div class="empty">${empty||'Nothing here yet.'}</div>`;
 }
-function renderDonors(){
+function donorFilter(d){
   const q=(document.getElementById('f-search').value||'').toLowerCase();
-  const ft=document.getElementById('f-type').value, fi=document.getElementById('f-tier').value;
-  let list=fundedDonors().filter(d=>{
-    if(q&&!(d.name.toLowerCase().includes(q)||(d.primary_contact||'').toLowerCase().includes(q)||(d.source||'').toLowerCase().includes(q)))return false;
-    if(ft&&d.type!==ft)return false;
-    if(fi&&donorTierKey(d)!==fi)return false;
-    return true;
-  });
-  const received=donors.reduce((s,d)=>s+(+d.amount_received||0),0);
+  const ft=document.getElementById('f-type').value, fi=document.getElementById('f-tier').value, fs=document.getElementById('f-stage').value, fp=document.getElementById('f-phase').value;
+  if(q&&!(d.name.toLowerCase().includes(q)||(d.primary_contact||'').toLowerCase().includes(q)||(d.source||'').toLowerCase().includes(q)))return false;
+  if(ft&&d.type!==ft)return false;
+  if(fi&&donorTierKey(d)!==fi)return false;
+  if(fs&&d.stage!==fs)return false;
+  if(fp&&String(d.phase_number||currentPhase())!==fp)return false;
+  return true;
+}
+function renderDonors(){
+  const funded=fundedDonors().filter(donorFilter);
+  const prospects=prospectDonors().filter(donorFilter);
+  const received=raisedTotal();
   const pledged=fundedDonors().reduce((s,d)=>s+Math.max(+d.amount_pledged||0,+d.amount_received||0),0);
-  document.getElementById('donor-metrics').innerHTML=[['Committed funders',fundedDonors().length],['Pledged',fmt(pledged)],['Received',fmt(received)],['Veterans funded',vet_slots.filter(v=>slotRaised(v.id)>=v.goal_amount).length]].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
-  document.getElementById('donor-list').innerHTML=donorRowsHTML(list,'No donors match these filters.');
-}
-function renderProspects(){
-  const q=(document.getElementById('pf-search').value||'').toLowerCase();
-  const ft=document.getElementById('pf-type').value, fi=document.getElementById('pf-tier').value, fs=document.getElementById('pf-stage').value;
-  let list=prospectDonors().filter(d=>{
-    if(q&&!(d.name.toLowerCase().includes(q)||(d.primary_contact||'').toLowerCase().includes(q)||(d.source||'').toLowerCase().includes(q)))return false;
-    if(ft&&d.type!==ft)return false;
-    if(fi&&donorTierKey(d)!==fi)return false;
-    if(fs&&d.stage!==fs)return false;
-    return true;
-  });
   const active=prospectDonors().filter(d=>d.stage!=='passed');
-  const potential=active.reduce((s,d)=>s+Math.max(+d.amount_pledged||0,0),0);
-  document.getElementById('prospect-metrics').innerHTML=[['Active prospects',active.length],['Potential pledged',fmt(potential)],['In conversation',prospectDonors().filter(d=>d.stage==='in_conversation').length],['Verbal commits',prospectDonors().filter(d=>d.stage==='verbal_commit').length]].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
-  document.getElementById('prospect-list').innerHTML=donorRowsHTML(list,'No prospects match these filters.');
+  document.getElementById('donor-metrics').innerHTML=[['Committed funders',fundedDonors().length],['Pledged',fmt(pledged)],['Received',fmt(received)],['Active prospects',active.length],['Verbal commits',prospectDonors().filter(d=>d.stage==='verbal_commit').length]].map(m=>`<div class="metric"><div class="n">${m[1]}</div><div class="l">${m[0]}</div></div>`).join('');
+  document.getElementById('donor-list').innerHTML=donorRowsHTML(funded,fundedDonors().length?'No funded donors match these filters.':'No committed or funded donors yet. When a prospect commits or gives, they move up here automatically.');
+  document.getElementById('prospect-list').innerHTML=donorRowsHTML(prospects,prospectDonors().length?'No prospects match these filters.':'No prospects yet. Use “+ Add donor” to start the pipeline.');
 }
+function renderProspects(){renderDonors();}
 
 function renderVets(){
   document.getElementById('vet-list').innerHTML=vet_slots.map(v=>{
@@ -587,7 +652,7 @@ function renderContracts(){
   }).join('');
 }
 
-function openModal(html){document.getElementById('modal').innerHTML=html;document.getElementById('overlay').classList.add('open');}
+function openModal(html){const m=document.getElementById('modal');m.classList.remove('wide');m.innerHTML=html;document.getElementById('overlay').classList.add('open');}
 function closeModal(){document.getElementById('overlay').classList.remove('open');}
 
 function openDonor(id){
@@ -601,6 +666,7 @@ function openDonor(id){
       <button class="close" onclick="closeModal()">×</button></div>
     <div class="mbody">
       <div class="kv"><span class="k">Stage</span><span class="v">${STAGES[d.stage]}${d.stage==='passed'?' · '+(d.passed_reason==='not_interested'?'not interested':'revisit later'):''}</span></div>
+      <div class="kv"><span class="k">Research phase</span><span class="v">${phaseLabel(d.phase_number||currentPhase())}${(()=>{const p=phases.find(x=>+x.phase_number===+(d.phase_number||currentPhase()));return p?' · '+esc(p.name):'';})()}</span></div>
       <div class="kv"><span class="k">Pledged</span><span class="v">${fmt(d.amount_pledged||0)}</span></div>
       <div class="kv"><span class="k">Received</span><span class="v">${fmt(d.amount_received||0)}</span></div>
       ${d.primary_contact?`<div class="kv"><span class="k">Primary contact</span><span class="v"><span class="link" onclick="donorPrimaryContact('${d.id}')">${d.primary_contact}</span></span></div>`:''}
@@ -649,6 +715,7 @@ function donorFormFields(d){
     <div class="field"><label>Stage</label><select id="fd-stage">${Object.entries(STAGES).map(([k,v])=>`<option value="${k}" ${d.stage===k?'selected':''}>${v}</option>`).join('')}</select></div>
     <div class="field"><label>Source</label><input id="fd-source" value="${d.source||''}"></div>
   </div>
+  <div class="field"><label>Research phase this gift funds</label><select id="fd-phase">${phases.slice().sort((a,b)=>a.sort-b.sort).map(p=>`<option value="${p.phase_number}" ${(+d.phase_number||currentPhase())===+p.phase_number?'selected':''}>Phase ${p.phase_number} · ${esc(p.name)} (${fmtK(+p.goal_amount||0)})</option>`).join('')}</select></div>
   <div class="two">
     <div class="field"><label>Amount pledged</label><input id="fd-pledged" type="number" value="${d.amount_pledged||0}"></div>
     <div class="field"><label>Amount received</label><input id="fd-received" type="number" value="${d.amount_received||0}"></div>
@@ -663,10 +730,11 @@ function openDonorForm(id){
 function saveDonor(id){
   const g=x=>document.getElementById(x).value;
   const name=g('fd-name').trim();if(!name){alert('Name required');return;}
-  const data={name,type:g('fd-type'),tier:g('fd-tier')||null,target_tier:g('fd-target')||null,stage:g('fd-stage'),source:g('fd-source'),amount_pledged:+g('fd-pledged')||0,amount_received:+g('fd-received')||0,primary_contact:g('fd-contact'),owner_id:g('fd-owner')};
+  const data={name,type:g('fd-type'),tier:g('fd-tier')||null,target_tier:g('fd-target')||null,stage:g('fd-stage'),source:g('fd-source'),amount_pledged:+g('fd-pledged')||0,amount_received:+g('fd-received')||0,primary_contact:g('fd-contact'),owner_id:g('fd-owner'),phase_number:+g('fd-phase')||currentPhase()};
   if(id){Object.assign(donors.find(x=>x.id===id),data);P.update('donors',id,data);openDonor(id);}
   else{const rec={id:nid('d'),...data};donors.push(rec);P.insert('donors',rec);closeModal();}
-  renderDonors();renderProspects();renderHome();renderVets();
+  renderDonors();renderHome();renderVets();
+  sb.from('phase_contributions').select('*').then(r=>{if(!r.error){phase_contribs=r.data||[];renderHome();renderDonors();}});
 }
 
 function taskRow(t){
@@ -881,7 +949,7 @@ function addSponsor(sid){
   openVetSlot(sid);renderVets();renderHome();
 }
 
-const NOW=new Date('2026-07-06T08:00');
+const NOW=new Date();
 function taskGated(t){return (t.blocked_by||[]).some(bid=>{const b=tasks.find(x=>x.id===bid);return b&&b.status!=='done';});}
 function isOverdue(t){return t.status!=='done'&&t.due_at&&new Date(t.due_at)<NOW;}
 function taskFullRow(t){
@@ -989,20 +1057,24 @@ function orgPeople(name){
   const rs=roster.filter(r=>(r.org||'').toLowerCase()===n).map(r=>({kind:'lead',id:r.id,name:r.name,sub:r.role||''}));
   return cs.concat(rs);
 }
+const ORG_STATUS={active:'Active',prospective:'Prospective',inactive:'Inactive'};
 function renderOrgs(){
-  const host0=document.getElementById('org-list');if(!host0)return;
-  const sb=document.getElementById('of-search');const q=(sb?sb.value:'').toLowerCase();
-  const list=organizations.filter(o=>!q||o.name.toLowerCase().includes(q)||(o.type||'').toLowerCase().includes(q));
-  const host=document.getElementById('org-list');
-  if(!list.length){host.innerHTML='<div class="empty">No organizations yet.</div>';return;}
+  const host=document.getElementById('org-list');if(!host)return;
+  const sb0=document.getElementById('of-search');const q=(sb0?sb0.value:'').toLowerCase();
+  const fs=(document.getElementById('of-status')||{}).value||'';
+  const m=document.getElementById('org-metrics');
+  if(m)m.innerHTML=[['Partners',organizations.length],['Active',organizations.filter(o=>(o.status||'active')==='active').length],['Prospective',organizations.filter(o=>o.status==='prospective').length],['People linked',organizations.reduce((a,o)=>a+orgPeople(o.name).length,0)]].map(x=>`<div class="metric"><div class="n">${x[1]}</div><div class="l">${x[0]}</div></div>`).join('');
+  const list=organizations.filter(o=>(!q||o.name.toLowerCase().includes(q)||(o.type||'').toLowerCase().includes(q)||(o.partnership||'').toLowerCase().includes(q))&&(!fs||(o.status||'active')===fs)).sort((a,b)=>a.name.localeCompare(b.name));
+  if(!list.length){host.innerHTML='<div class="empty">No partners match.</div>';return;}
   host.innerHTML=list.map(o=>{
-    const ppl=orgPeople(o.name).length;const nn=org_notes.filter(n=>n.org_id===o.id).length;
-    return `<div class="wcard" style="cursor:pointer" onclick="openOrg('${o.id}')"><div class="ic">❖</div><h3 class="serif" style="font-size:16px">${o.name}</h3><p style="min-height:auto;font-size:12px">${o.type||''}</p><div class="statl">${ppl} contact${ppl===1?'':'s'} · ${nn} note${nn===1?'':'s'}</div></div>`;
+    const ppl=orgPeople(o.name).length;const nn=org_notes.filter(n=>n.org_id===o.id).length;const st=o.status||'active';
+    const badge=st==='active'?'b-ok':st==='prospective'?'b-pend':'b-closed';
+    return `<div class="wcard" style="cursor:pointer" onclick="openOrg('${o.id}')"><div class="ic">❖</div><h3 class="serif" style="font-size:16px">${esc(o.name)}</h3><p style="min-height:auto;font-size:12px">${esc(o.type||'')}${o.partnership?' — '+esc(o.partnership):''}</p><div class="statl"><span class="badge ${badge}">${ORG_STATUS[st]||st}</span> · ${ppl} contact${ppl===1?'':'s'} · ${nn} note${nn===1?'':'s'}</div></div>`;
   }).join('');
 }
 function openOrgByName(name){
   let o=organizations.find(x=>x.name.toLowerCase()===String(name).toLowerCase());
-  if(!o){o={id:nid('o'),name:name,type:'',website:'',phone:'',address:'',notes:''};organizations.push(o);P.insert('organizations',o);renderOrgs();}
+  if(!o){o={id:nid('o'),name:name,type:'',status:'active',website:'',phone:'',address:'',notes:''};organizations.push(o);P.insert('organizations',o);renderOrgs();}
   openOrg(o.id);
 }
 function openOrg(id){
@@ -1019,6 +1091,9 @@ function openOrg(id){
     <div class="mbody">
       <div id="og-details">
         ${row('Type',o.type)}
+        ${row('Status',ORG_STATUS[o.status||'active']||o.status)}
+        ${row('Partnership',o.partnership)}
+        ${row('Main contact',o.contact_name)}
         ${row('Website',o.website,v=>`<a class="link" href="${v}" target="_blank" rel="noopener">${v.replace(/^https?:\/\//,'')}</a>`)}
         ${row('Phone',o.phone,v=>`<a class="link" href="tel:${v}">${v}</a>`)}
         ${row('Address',o.address)}
@@ -1040,7 +1115,10 @@ function openOrgForm(id){
   openModal(`<div class="mhead"><div class="mt"><h3>${id?'Edit organization':'Add organization'}</h3><div class="msub">Entity record</div></div><button class="close" onclick="closeModal()">×</button></div>
   <div class="mbody">
     <div class="field"><label>Name</label><input id="og-name" value="${o.name||''}"></div>
-    <div class="field"><label>Type</label><input id="og-type" value="${o.type||''}" placeholder="Foundation, Nonprofit / VSO, Academic, Government relations..."></div>
+    <div class="two"><div class="field"><label>Type</label><input id="og-type" value="${o.type||''}" placeholder="Academic / IRB, Clinic, Research institute, Government relations, Nonprofit / VSO..."></div>
+    <div class="field"><label>Status</label><select id="og-status">${Object.entries(ORG_STATUS).map(([k,v])=>`<option value="${k}" ${(o.status||'active')===k?'selected':''}>${v}</option>`).join('')}</select></div></div>
+    <div class="field"><label>Partnership — what they bring to the study</label><input id="og-partnership" value="${o.partnership||''}" placeholder="IRB oversight, clinical site, imaging, lobbying, referrals..."></div>
+    <div class="field"><label>Main contact</label><input id="og-contact" value="${o.contact_name||''}"></div>
     <div class="two"><div class="field"><label>Website</label><input id="og-web" value="${o.website||''}"></div><div class="field"><label>Phone</label><input id="og-phone" value="${o.phone||''}"></div></div>
     <div class="field"><label>Address</label><input id="og-addr" value="${o.address||''}"></div>
     <div class="field"><label>Summary / background</label><textarea id="og-notesf">${o.notes||''}</textarea></div>
@@ -1050,7 +1128,7 @@ function openOrgForm(id){
 function saveOrg(id){
   const g=x=>document.getElementById(x).value;
   const name=g('og-name').trim();if(!name){alert('Name required');return;}
-  const data={name,type:g('og-type'),website:g('og-web'),phone:g('og-phone'),address:g('og-addr'),notes:g('og-notesf')};
+  const data={name,type:g('og-type'),status:g('og-status'),partnership:g('og-partnership'),contact_name:g('og-contact'),website:g('og-web'),phone:g('og-phone'),address:g('og-addr'),notes:g('og-notesf')};
   if(id){Object.assign(organizations.find(x=>x.id===id),data);P.update('organizations',id,data);openOrg(id);}
   else{const rec={id:nid('o'),...data};organizations.push(rec);P.insert('organizations',rec);closeModal();}
   renderOrgs();renderHome();
@@ -1242,24 +1320,290 @@ function saveEvent(id){
   else{const rec={id:nid('ce'),...data};cal_events.push(rec);P.insert('calendar_events',rec);}
   closeModal();renderCalendar();renderHome();
 }
-window.__renderAll=function(){fillFilterOptions();renderHome();renderProspects();renderDonors();renderVets();renderContracts();renderTasks();renderReferrals();renderTeam();renderCalendar();renderConversations();};
+/* ===================== PARTICIPANTS — Phase 1 applications ===================== */
+/* Label maps mirror src/content/intake.ts on mtbiresearch.com. Values are what the
+   form stores; labels are what the team reads here. Keep the two in sync. */
+const APP_STATUS={new:'New',screening:'Screening',contacted:'Contacted',scheduled:'Scheduled',accepted:'Accepted',waitlist:'Waitlist',declined:'Declined',withdrawn:'Withdrawn'};
+const APP_CLOSED=['accepted','declined','withdrawn'];
+const L_BRANCH={army:'Army',navy:'Navy',marine_corps:'Marine Corps',air_force:'Air Force',space_force:'Space Force',coast_guard:'Coast Guard',national_guard:'National Guard',reserves:'Reserves'};
+const L_SOF={army_special_forces:'Army Special Forces (Green Berets)',army_rangers:'75th Ranger Regiment',delta_cag:'Delta Force / CAG (Tier 1)',army_160th_soar:'160th SOAR (Night Stalkers)',navy_seal:'Navy SEAL',devgru:'DEVGRU / SEAL Team Six (Tier 1)',swcc:'SWCC',navy_eod:'Navy EOD',marsoc_raider:'Marine Raider (MARSOC)',marine_recon:'Marine Force Recon / Reconnaissance',af_cct:'Air Force Combat Controller (CCT)',af_pj:'Air Force Pararescue (PJ)',af_sr:'Air Force Special Reconnaissance (SR)',af_tacp:'Air Force TACP / Special Tactics',army_eod_sof:'Army EOD attached to SOF',cg_msrt_dsf:'Coast Guard MSRT / DSF',sof_enabler:'SOF enabler / support',other:'Other'};
+const L_COUNT={'1':'1','2-3':'2–3','4-6':'4–6','7-10':'7–10','10+':'more than 10'};
+const COUNT_RANK={'1':1,'2-3':2,'4-6':3,'7-10':4,'10+':5};
+const L_BLAST={none:'no large-blast exposure',direct:'direct large-blast exposure (shockwave to the body)',indirect:'indirect large-blast exposure (through a vehicle)',both:'both direct and indirect large-blast exposure'};
+const L_SYMPTOM={headaches:'Headaches',migraines:'Migraines',head_pressure:'Pressure in the head',facial_pain:'Facial pain',jaw_pain:'Jaw pain',neck_pain:'Neck pain',dizziness:'Dizziness',vertigo:'Vertigo',balance:'Balance problems',motion_sensitivity:'Motion sensitivity',nausea:'Nausea',oculomotor:'Eye-movement (oculomotor) issues',nystagmus:'Nystagmus',blurred_double_vision:'Blurred or double vision',light_sensitivity:'Light sensitivity',screens_reading:'Trouble with screens or reading',tinnitus:'Ringing in the ears',hearing_loss:'Hearing loss',sound_sensitivity:'Sound sensitivity',brain_fog:'Brain fog',cognitive_decline:'Cognitive decline',memory:'Memory problems',concentration:'Difficulty concentrating',word_finding:'Word-finding difficulty',slowed_thinking:'Slowed thinking',sleep:'Sleep disturbances',fatigue:'Fatigue',ptsd:'PTSD',fight_or_flight:'Fight-or-flight symptoms',anxiety:'Anxiety',depression:'Depression',irritability:'Irritability or anger',mood_swings:'Mood swings',numbness_tingling:'Numbness or tingling',dysautonomia:'Heart-rate or blood-pressure swings',temperature:'Temperature dysregulation'};
+const L_NOVEL={hbot:'Hyperbaric oxygen therapy (HBOT)',photobiomodulation:'Photobiomodulation',tms:'Transcranial magnetic stimulation (TMS)',ketamine:'Ketamine',psychedelic:'Psychedelic therapy (ayahuasca, ibogaine, psilocybin, etc.)',stellate_ganglion_block:'Stellate ganglion block (SGB)',stem_cell:'Stem cell therapy',vestibular_rehab:'Vestibular rehabilitation',vision_therapy:'Vision therapy',neurofeedback:'Neurofeedback / qEEG',upper_cervical:'Upper cervical / craniocervical care',hormone_peptide:'Hormone or peptide therapy',iv_nutritional:'IV or nutritional therapy',other:'Other'};
+const L_CONV={mental_health:'Mental health counseling or therapy',psychiatric_medication:'Psychiatric medication',pain_medication:'Pain medication',migraine_medication:'Migraine medication',sleep_medication:'Sleep medication',physical_therapy:'Physical therapy',occupational_therapy:'Occupational therapy',speech_cognitive_therapy:'Speech or cognitive therapy',va_tbi_program:'VA TBI / polytrauma program',none:'None'};
+const L_IMG={mri:'MRI',fmri:'fMRI',dti:'DTI',swi:'SWI',spect:'SPECT',ct:'CT',other:'Other brain imaging',none:'None'};
+const L_CONTACT={email:'email',phone:'phone call',text:'text message'};
+const lbl=(map,v)=>map[v]||v;
+const lc=t=>t.replace(/^([A-Z])(?=[a-z])/,c=>c.toLowerCase());
+const lcList=a=>a.map(lc).join(', ');
+const lbls=(map,arr)=>(arr||[]).map(v=>lbl(map,v));
+const joinAnd=a=>a.length<=1?a.join(''):a.length===2?a.join(' and '):a.slice(0,-1).join(', ')+', and '+a[a.length-1];
+const yn=v=>v===true?'Yes':v===false?'No':'—';
+const appName=a=>a.full_name||'(no name)';
+const appLoc=a=>[a.city,a.state].filter(Boolean).join(', ');
+const appBranch=a=>lbls(L_BRANCH,a.branches).join(' / ');
+const isSOF=a=>!!a.served_sof;
+const appStatusBadge=a=>{const s=a.status||'new';const cls=s==='new'?'b-new':s==='accepted'?'b-ok':APP_CLOSED.includes(s)?'b-closed':'b-pend';return `<span class="badge ${cls}">${APP_STATUS[s]||s}</span>`;};
+const appNum=a=>a.application_number?'#'+String(a.application_number).padStart(3,'0'):'';
+const symptomCount=a=>(a.symptoms||[]).length+(a.symptoms_other?1:0);
+
+function renderParticipants(){
+  const host=document.getElementById('app-list');if(!host)return;
+  const q=(document.getElementById('af-search').value||'').toLowerCase().trim();
+  const fs=document.getElementById('af-status').value, fsof=document.getElementById('af-sof').value, sort=document.getElementById('af-sort').value;
+  // status filter options (built once, values preserved)
+  const sel=document.getElementById('af-status');
+  if(sel.options.length<=2){Object.entries(APP_STATUS).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v;sel.appendChild(o);});sel.value=fs;}
+  const m=[['Applications',applications.length],['New',applications.filter(a=>a.status==='new').length],['In screening',applications.filter(a=>['screening','contacted','scheduled'].includes(a.status)).length],['Accepted',applications.filter(a=>a.status==='accepted').length],['Special Operations',applications.filter(isSOF).length]];
+  document.getElementById('app-metrics').innerHTML=m.map(x=>`<div class="metric"><div class="n">${x[1]}</div><div class="l">${x[0]}</div></div>`).join('');
+  let list=applications.filter(a=>{
+    if(fs==='active'){if(APP_CLOSED.includes(a.status))return false;}
+    else if(fs&&a.status!==fs)return false;
+    if(fsof==='sof'&&!isSOF(a))return false;
+    if(fsof==='nonsof'&&isSOF(a))return false;
+    if(q){
+      const hay=[a.full_name,a.email,a.phone,a.city,a.state,appBranch(a),lbls(L_SOF,a.sof_roles).join(' '),a.sof_roles_other,lbls(L_SYMPTOM,a.symptoms).join(' '),a.symptoms_other,APP_STATUS[a.status],appNum(a)].join(' ').toLowerCase();
+      if(!hay.includes(q))return false;
+    }
+    return true;
+  });
+  list.sort((x,y)=>{
+    if(sort==='oldest')return String(x.created_at).localeCompare(String(y.created_at));
+    if(sort==='name')return appName(x).localeCompare(appName(y));
+    if(sort==='events')return (COUNT_RANK[y.mtbi_event_count]||0)-(COUNT_RANK[x.mtbi_event_count]||0)||String(y.created_at).localeCompare(String(x.created_at));
+    return String(y.created_at).localeCompare(String(x.created_at));
+  });
+  if(!applications.length){host.innerHTML='<div class="empty">No applications yet. When someone applies at mtbiresearch.com/apply they will appear here within seconds.</div>';return;}
+  if(!list.length){host.innerHTML='<div class="empty">No applicants match these filters.</div>';return;}
+  host.innerHTML=list.map(a=>{
+    const notes=app_notes.filter(n=>n.application_id===a.id).length;
+    const sub=[appBranch(a)||(a.is_veteran===false?'Not a veteran':'Veteran'),appLoc(a),a.mtbi_event_count?lbl(L_COUNT,a.mtbi_event_count)+' mTBI events':'',symptomCount(a)?symptomCount(a)+' symptoms':''].filter(Boolean).join(' · ');
+    return `<div class="row" onclick="openParticipant('${a.id}')">
+      <div class="avatar">${initials(appName(a))}</div>
+      <div class="main">
+        <div class="rn">${esc(appName(a))} ${appStatusBadge(a)}${isSOF(a)?' <span class="badge b-sof">SOF · priority</span>':''}${a.source==='sample'?' <span class="badge b-risk">Sample record</span>':''}</div>
+        <div class="rs">${esc(sub)}${notes?' · '+notes+' note'+(notes===1?'':'s'):''}</div>
+      </div>
+      <div class="meta">${appNum(a)}<br>${fmtDT(a.created_at)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* A readable, human summary of who the applicant is — built from every field they submitted. */
+function participantSummary(a){
+  const P=[];
+  const name=esc(appName(a));
+  // Who
+  let who=`<b>${name}</b> `;
+  if(a.is_veteran===false)who+='is <b>not a veteran</b>';
+  else{
+    const br=appBranch(a);
+    who+=br?`is a <b>${esc(br)} veteran</b>`:'is a <b>veteran</b>';
+    if(isSOF(a)){
+      const roles=lbls(L_SOF,(a.sof_roles||[]).filter(r=>r!=='other'));
+      if(a.sof_roles_other)roles.push(a.sof_roles_other);
+      who+=roles.length?` who served in <b>Special Operations</b> as ${esc(joinAnd(roles))}`:' who served in <b>Special Operations</b>';
+    }
+  }
+  const loc=appLoc(a);if(loc)who+=`, based in <b>${esc(loc)}</b>`;
+  who+='.';
+  const pc=a.preferred_contact?lbl(L_CONTACT,a.preferred_contact):null;
+  const via=a.preferred_contact==='email'?a.email:(a.phone||a.email);
+  if(pc)who+=` Prefers to be reached by <b>${esc(pc)}</b>${via?' at '+esc(via):''}.`;
+  P.push(`<p class="lead">${who}</p>`);
+  // Injury
+  const inj=[];
+  if(a.mtbi_event_count)inj.push(`reports <b>${esc(lbl(L_COUNT,a.mtbi_event_count))} mTBI events</b> (impacts, blasts, or whiplash)`);
+  if(a.most_recent_mtbi)inj.push(`most recent around <b>${esc(a.most_recent_mtbi)}</b>`);
+  if(a.mtbi_diagnosed===true)inj.push('has a <b>formal mTBI diagnosis</b>');else if(a.mtbi_diagnosed===false)inj.push('has <b>never been formally diagnosed</b> with mTBI');
+  if(a.symptoms_over_3_months===true)inj.push('symptoms have <b>persisted longer than three months</b>');else if(a.symptoms_over_3_months===false)inj.push('symptoms have lasted <b>less than three months</b>');
+  const s1=inj.length?name.split(' ')[0]+' '+joinAnd(inj)+'.':'';
+  const bl=[];
+  if(a.repetitive_blast_diagnosed===true)bl.push('diagnosed with <b>repetitive blast injury</b>');
+  if(a.large_blast_exposure&&a.large_blast_exposure!=='none')bl.push('<b>'+esc(L_BLAST[a.large_blast_exposure]||a.large_blast_exposure)+'</b>');
+  if(a.served_as_breacher===true)bl.push('served as a <b>breacher</b>');
+  if(a.knocked_unconscious===true)bl.push('has been <b>knocked unconscious</b>');
+  const s2=bl.length?'Blast history: '+joinAnd(bl)+'.':(a.large_blast_exposure==='none'?'No large-blast exposure reported.':'');
+  if(s1||s2)P.push(`<p>${[s1,s2].filter(Boolean).join(' ')}</p>`);
+  // Symptoms
+  const sy=lbls(L_SYMPTOM,a.symptoms);
+  if(sy.length||a.symptoms_other){
+    let t=`<b>${symptomCount(a)} long-term symptoms</b>`+(sy.length?': '+esc(lcList(sy)):'')+'.';
+    if(a.symptoms_other)t+=` Also describes: <i>${esc(a.symptoms_other)}</i>`;
+    P.push(`<p>${t}</p>`);
+  }
+  if(a.functional_impact)P.push(`<p>How it affects daily life, in their words:</p><div class="quote">${esc(a.functional_impact)}</div>`);
+  // Care
+  const first=name.split(' ')[0];
+  const care=[];
+  const nv=lbls(L_NOVEL,(a.novel_treatments||[]).filter(v=>v!=='other'));if(a.novel_treatments_other)nv.push(a.novel_treatments_other);
+  care.push(nv.length?`${first} has tried <b>${esc(joinAnd(nv))}</b>.`:`${first} has not tried any of the listed novel treatments.`);
+  const cv=lbls(L_CONV,(a.conventional_treatments||[]).filter(v=>v!=='none'));
+  if(cv.length)care.push(`Conventional care so far: ${esc(lcList(cv))}.`);
+  if(a.medications)care.push(`Medications: ${esc(a.medications)}.`);
+  if(a.currently_in_treatment===true)care.push('<b>Currently in treatment</b>'+(a.current_treatment_detail?' — '+esc(a.current_treatment_detail):'')+'.');
+  else if(a.currently_in_treatment===false)care.push('<b>Not currently in treatment.</b>');
+  P.push(`<p>${care.join(' ')}</p>`);
+  // Records
+  const rec=[];
+  const im=lbls(L_IMG,(a.imaging_access||[]).filter(v=>v!=='none'));
+  rec.push(im.length?`can provide <b>${esc(joinAnd(im))}</b> brain imaging`:'has no prior brain imaging to share');
+  if(a.has_va_records===true)rec.push('<b>has VA records</b>');else if(a.has_va_records===false)rec.push('has no VA records');
+  if(a.has_service_records===true)rec.push('<b>has service records</b>');else if(a.has_service_records===false)rec.push('has no service records');
+  P.push(`<p>${joinAnd(rec).replace(/^./,c=>c.toUpperCase())}.</p>`);
+  // Agreements
+  const agreed=a.agree_initial_evaluation&&a.agree_visit_schedule&&a.agree_no_cost_no_compensation&&a.agree_privacy;
+  P.push(`<p style="color:var(--text2);font-size:12.5px">${agreed?'Agreed to all participation terms':'Agreements incomplete'}${a.agreements_version?' (v'+esc(a.agreements_version)+')':''}${a.agreed_at?' on '+fmtDT(a.agreed_at):''}. Applied ${fmtDT(a.created_at)} via ${esc(a.source||'website')}.</p>`);
+  return `<div class="summary">${P.join('')}</div>`;
+}
+function participantFlags(a){
+  const f=[];
+  if(isSOF(a))f.push('<span class="flag ok">Special Operations — priority</span>');
+  if(a.is_veteran===false)f.push('<span class="flag">Not a veteran</span>');
+  if(a.symptoms_over_3_months===true)f.push('<span class="flag neutral">Symptoms &gt; 3 months</span>');
+  if(a.repetitive_blast_diagnosed===true)f.push('<span class="flag neutral">Repetitive blast dx</span>');
+  if(a.served_as_breacher===true)f.push('<span class="flag neutral">Breacher</span>');
+  if(a.knocked_unconscious===true)f.push('<span class="flag neutral">Loss of consciousness</span>');
+  if((a.imaging_access||[]).some(v=>v!=='none'))f.push('<span class="flag neutral">Imaging available</span>');
+  if(a.currently_in_treatment===true)f.push('<span class="flag neutral">In treatment now</span>');
+  return f.length?`<div class="flags">${f.join('')}</div>`:'';
+}
+function chipList(map,arr,other){
+  const items=(arr||[]).filter(v=>v!=='other'||!other).map(v=>`<span class="chip on">${esc(lbl(map,v))}</span>`);
+  if(other)items.push(`<span class="chip on">${esc(other)}</span>`);
+  return items.length?`<div class="chips">${items.join('')}</div>`:'<span style="color:var(--muted)">None</span>';
+}
+function openParticipant(id,tab){
+  const a=applications.find(x=>x.id===id);if(!a)return;
+  const notes=app_notes.filter(n=>n.application_id===id).sort((x,y)=>String(y.created_at).localeCompare(String(x.created_at)));
+  const row=(k,v)=>`<div class="kv"><span class="k">${k}</span><span class="v">${v==null||v===''?'—':v}</span></div>`;
+  const stack=(k,v)=>`<div class="kv stack"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+  const statusOpts=Object.entries(APP_STATUS).map(([k,v])=>`<option value="${k}" ${a.status===k?'selected':''}>${v}</option>`).join('');
+  openModal(`
+    <div class="mhead"><div class="avatar">${initials(appName(a))}</div>
+      <div class="mt"><h3>${esc(appName(a))}</h3><div class="msub">Application ${appNum(a)} · ${fmtDT(a.created_at)}${isSOF(a)?' · <span class="badge b-sof">SOF · priority</span>':''}${a.source==='sample'?' · <span class="badge b-risk">Sample record — not a real applicant</span>':''}</div>
+        <div class="contactline">
+          ${a.email?`<a class="link" href="mailto:${esc(a.email)}">${esc(a.email)}</a>`:''}
+          ${a.phone?`<a class="link" href="tel:${esc(a.phone)}">${esc(a.phone)}</a>`:''}
+          ${a.preferred_contact?`<span style="font-size:12px;color:var(--muted)">prefers ${esc(lbl(L_CONTACT,a.preferred_contact))}</span>`:''}
+        </div>
+      </div>
+      <button class="close" onclick="closeModal()">×</button></div>
+    <div class="statusbar">
+      <span>Status</span>
+      <select onchange="setAppStatus('${a.id}',this.value)">${statusOpts}</select>
+      ${appStatusBadge(a)}
+      <span class="who">${a.reviewed_by?'Last reviewed by '+esc(a.reviewed_by)+(a.reviewed_at?' · '+fmtDT(a.reviewed_at):''):'Not yet reviewed'}</span>
+    </div>
+    <div class="tabbar">
+      <button class="tab ${tab!=='details'&&tab!=='notes'?'active':''}" data-pt="summary" onclick="participantTab('summary')">Summary</button>
+      <button class="tab ${tab==='details'?'active':''}" data-pt="details" onclick="participantTab('details')">All answers</button>
+      <button class="tab ${tab==='notes'?'active':''}" data-pt="notes" onclick="participantTab('notes')">Notes${notes.length?' ('+notes.length+')':''}</button>
+    </div>
+    <div class="mbody">
+      <div id="pt-summary" style="display:${tab==='details'||tab==='notes'?'none':''}">
+        ${participantSummary(a)}
+        ${participantFlags(a)}
+      </div>
+      <div id="pt-details" style="display:${tab==='details'?'':'none'}">
+        <div class="mlabel" style="margin-top:0">Contact</div>
+        ${row('Full name',esc(a.full_name))}${row('Email',a.email?`<a class="link" href="mailto:${esc(a.email)}">${esc(a.email)}</a>`:'')}${row('Phone',a.phone?`<a class="link" href="tel:${esc(a.phone)}">${esc(a.phone)}</a>`:'')}
+        ${row('Best way to reach',esc(lbl(L_CONTACT,a.preferred_contact)))}${row('City / state',esc(appLoc(a)))}
+        <div class="mlabel">Military service</div>
+        ${row('Veteran',yn(a.is_veteran))}${stack('Branch(es)',chipList(L_BRANCH,a.branches))}
+        ${row('Served in Special Operations',yn(a.served_sof))}${isSOF(a)?stack('SOF roles',chipList(L_SOF,a.sof_roles,a.sof_roles_other)):''}
+        <div class="mlabel">Injury history</div>
+        ${row('Diagnosed with mTBI',yn(a.mtbi_diagnosed))}${row('Approximate mTBI events',esc(lbl(L_COUNT,a.mtbi_event_count)))}${row('Most recent mTBI',esc(a.most_recent_mtbi))}
+        ${row('Symptoms longer than 3 months',yn(a.symptoms_over_3_months))}${row('Repetitive blast injury diagnosed',yn(a.repetitive_blast_diagnosed))}
+        ${row('Large blast exposure',a.large_blast_exposure?esc(a.large_blast_exposure==='none'?'No':L_BLAST[a.large_blast_exposure]):'')}
+        ${row('Served as a breacher',yn(a.served_as_breacher))}${row('Knocked unconscious',yn(a.knocked_unconscious))}
+        <div class="mlabel">Symptoms</div>
+        ${stack('Long-term symptoms ('+symptomCount(a)+')',chipList(L_SYMPTOM,a.symptoms))}
+        ${a.symptoms_other?stack('Other symptoms',`<div class="quote">${esc(a.symptoms_other)}</div>`):''}
+        ${a.functional_impact?stack('Functional impact',`<div class="quote">${esc(a.functional_impact)}</div>`):''}
+        <div class="mlabel">Treatment history</div>
+        ${stack('Novel treatments tried',chipList(L_NOVEL,a.novel_treatments,a.novel_treatments_other))}
+        ${stack('Conventional care',chipList(L_CONV,a.conventional_treatments))}
+        ${row('Medications',esc(a.medications))}${row('Currently in treatment',yn(a.currently_in_treatment))}${a.current_treatment_detail?stack('Current treatment',`<div class="quote">${esc(a.current_treatment_detail)}</div>`):''}
+        <div class="mlabel">Imaging &amp; records</div>
+        ${stack('Brain imaging available',chipList(L_IMG,a.imaging_access))}${row('VA records',yn(a.has_va_records))}${row('Service records',yn(a.has_service_records))}
+        <div class="mlabel">Agreements</div>
+        ${row('Initial consultation &amp; evaluation (~1.5 h, Cerebral St. Petersburg)',yn(a.agree_initial_evaluation))}${row('2–3 visits/week for 8 weeks',yn(a.agree_visit_schedule))}
+        ${row('No cost / no compensation; complete both evaluations',yn(a.agree_no_cost_no_compensation))}${row('Privacy acknowledgment',yn(a.agree_privacy))}
+        ${row('Agreement version',esc(a.agreements_version))}${row('Agreed at',fmtDT(a.agreed_at))}
+        <div class="mlabel">Record</div>
+        ${row('Application',appNum(a))}${row('Submitted',fmtDT(a.created_at))}${row('Last updated',fmtDT(a.updated_at))}${row('Source',esc(a.source))}
+      </div>
+      <div id="pt-notes" style="display:${tab==='notes'?'':'none'}">
+        <div class="addnote"><input id="new-appnote" placeholder="Add a note — call outcome, screening result, next step" onkeydown="if(event.key==='Enter')addAppNote('${a.id}')"><button class="btn btn-outline btn-sm" onclick="addAppNote('${a.id}')">Add</button></div>
+        ${a.internal_notes?`<div class="note"><div class="nmeta" style="margin:0 0 3px">Internal notes (from record)</div>${esc(a.internal_notes)}</div>`:''}
+        ${notes.length?notes.map(n=>`<div class="note">${esc(n.body)}<div class="nmeta">${esc(n.author||'—')} · ${fmtDT(n.created_at)}</div></div>`).join(''):'<div class="empty" style="padding:12px">No notes yet. Add the first one above.</div>'}
+      </div>
+    </div>`);
+  document.getElementById('modal').classList.add('wide');
+}
+function participantTab(t){
+  ['summary','details','notes'].forEach(k=>{const el=document.getElementById('pt-'+k);if(el)el.style.display=k===t?'':'none';});
+  document.querySelectorAll('.tabbar .tab').forEach(b=>b.classList.toggle('active',b.dataset.pt===t));
+}
+async function currentUserEmail(){try{const {data}=await sb.auth.getUser();return (data&&data.user&&data.user.email)||'team';}catch(e){return 'team';}}
+async function setAppStatus(id,status){
+  const a=applications.find(x=>x.id===id);if(!a||a.status===status)return;
+  const by=await currentUserEmail();
+  const patch={status,reviewed_by:by,reviewed_at:new Date().toISOString()};
+  Object.assign(a,patch);
+  P.update('phase1_applications',id,patch);
+  openParticipant(id);renderParticipants();renderHome();
+}
+async function addAppNote(id){
+  const el=document.getElementById('new-appnote');const v=(el.value||'').trim();if(!v)return;
+  const by=await currentUserEmail();
+  const rec={id:nid('an'),application_id:id,author:by,body:v,created_at:new Date().toISOString()};
+  app_notes.push(rec);P.insert('phase1_application_notes',rec);
+  openParticipant(id,'notes');renderParticipants();
+}
+async function reloadApplications(flash){
+  const [ap,an]=await Promise.all([sb.from('phase1_applications').select('*').order('created_at',{ascending:false}),sb.from('phase1_application_notes').select('*')]);
+  if(ap.error)console.error('applications',ap.error);
+  applications=ap.data||[];app_notes=an.data||[];
+  renderParticipants();renderHome();
+  if(flash){const c=document.getElementById('app-live');if(c){c.style.opacity='0.4';setTimeout(()=>c.style.opacity='',300);}}
+}
+let appChannel=null;
+function subscribeApplications(){
+  if(appChannel)return;
+  const chip=document.getElementById('app-live');
+  appChannel=sb.channel('os-participants')
+    .on('postgres_changes',{event:'*',schema:'public',table:'phase1_applications'},()=>reloadApplications())
+    .on('postgres_changes',{event:'*',schema:'public',table:'phase1_application_notes'},()=>reloadApplications())
+    .subscribe(status=>{ if(chip){ if(status==='SUBSCRIBED'){chip.classList.remove('off');chip.lastChild.textContent='Live';} else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){chip.classList.add('off');chip.lastChild.textContent='Refresh to sync';} } });
+}
+/* =================== end participants =================== */
+
+window.__renderAll=function(){fillFilterOptions();renderHome();renderDonors();renderVets();renderContracts();renderTasks();renderReferrals();renderTeam();renderCalendar();renderConversations();renderParticipants();renderOrgs();};
 </script>
 <script>
 async function hydrate(){
   const q=n=>sb.from(n).select('*');
-  const [ros,con,orgs,ornotes,refs,don,dn,obl,vs,vc,ctr,cn,cd,cc,tk,ce,cv]=await Promise.all([
+  const [ros,con,orgs,ornotes,refs,don,dn,obl,vs,vc,ctr,cn,cd,cc,tk,ce,cv,ap,an,ph,pc]=await Promise.all([
     q('roster'),q('contacts'),q('organizations'),q('org_notes'),q('referrals'),
     q('donors'),q('donor_notes'),q('donor_obligations'),q('veteran_slots'),q('veteran_contributions'),
-    q('contracts'),q('contract_notes'),q('contract_documents'),q('contract_contacts'),q('tasks'),q('calendar_events'),q('conversations')
+    q('contracts'),q('contract_notes'),q('contract_documents'),q('contract_contacts'),q('tasks'),q('calendar_events'),q('conversations'),
+    sb.from('phase1_applications').select('*').order('created_at',{ascending:false}),q('phase1_application_notes'),q('phases'),q('phase_contributions')
   ]);
   roster=ros.data||[];contacts=con.data||[];organizations=orgs.data||[];org_notes=ornotes.data||[];referrals=refs.data||[];
   donors=don.data||[];donor_notes=dn.data||[];obligations=obl.data||[];vet_slots=vs.data||[];vet_contribs=vc.data||[];
   contracts=ctr.data||[];contract_notes=cn.data||[];contract_documents=cd.data||[];contract_contacts=cc.data||[];tasks=tk.data||[];cal_events=ce.data||[];conversations=cv.data||[];
+  applications=ap.data||[];app_notes=an.data||[];if(ap.error)console.error('applications',ap.error);
+  phases=ph.data||[];phase_contribs=pc.data||[];
 }
 async function boot(){
   try{ await hydrate(); }catch(e){ document.getElementById('lg-err').textContent='Could not load data. '+(e.message||''); return; }
   document.getElementById('login-gate').style.display='none';
   window.__renderAll();
+  subscribeApplications();
 }
 async function doLogin(){
   const email=(document.getElementById('lg-email').value||'').trim();
